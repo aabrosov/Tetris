@@ -1,133 +1,143 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-
-public class NewBehaviourScript : MonoBehaviour {
-    private int GameMode = 0;
-    private static readonly int ScreenWidth = 60;
-    private static readonly int ScreenHeight = 30;
-    private static int GlassWidth = 15;
-    private static int GlassHeight = 15;
-    private readonly int[,] Field = new int[ScreenWidth, ScreenHeight];
-    
-	// Use this for initialization
-	void Start ()
+namespace Tetris
+{
+    public class NewBehaviourScript : MonoBehaviour
     {
-        Random rnd = new Random();
-        if (EditorUtility.DisplayDialog("Game mode selection", "Please, select game mode", "Mode 1", "Mode 2"))
+        private readonly Texture2D[] MyTextures = new Texture2D[16];
+        public static int FigCount;
+        private static int ScreenWidth;
+        private static int ScreenHeight;
+        private static int GlassWidth;
+        private static int GlassHeight;
+        private static int[,] Glass;
+        private static int Scale;
+        private static int CurrentFig;
+        private static int PosX;
+        private static int PosY;
+        private static int Rot;
+        // Use this for initialization
+        void Start()
         {
-            GameMode = 1;
-            GlassHeight = 20;
-            GlassWidth = 10;
-        }
-        else
-        {
-            GameMode = 2;
-            GlassHeight = 12;
-            GlassWidth = 20;
-        }
-        //fix glass size if it's too much
-        if (GlassHeight > ScreenHeight - 2)
-        {
-            GlassHeight = ScreenHeight - 2;
-        }
-        if (GlassWidth > ScreenWidth - 2)
-        {
-            GlassWidth = ScreenWidth - 2;
-        }
-        //margin to center glass
-        int Margin = (ScreenWidth - GlassWidth) / 2;
-        //draw glass walls
-        for (int k = ScreenHeight - GlassHeight - 1; k < ScreenHeight; k++)
-        {
-            Field[Margin - 1, k] = 1;
-            Field[GlassWidth + Margin, k] = 1;
-        }
-        //draw glass bottom
-        for (int k = Margin - 1; k < GlassWidth + Margin; k++)
-        {
-            Field[k, ScreenHeight - 1] = 1;
-        }
-        //add palette
-        for (int k = 0; k < 16; k++)
-        {
-            Field[k, 0] = k;
-        }
-    }
-    void OnGUI()
-    {
-        //color table
-        // 0 - white
-        // 1 - black
-        // 2 - red
-        // 3 - green
-        // 4 - blue
-        // 5 - cyan
-        // 6 - magenta
-        // 7 - yellow
-        // 8 - lightgray
-        // 9 - darkgray
-        // 10 - darkred
-        // 11 - darkgreen
-        // 12 - darkblue
-        // 13 - darkcyan
-        // 14 - darkmagenta
-        // 15 - darkyellow
-        Texture2D[] MyTextures = new Texture2D[16];
-        Color[] MyColors = new Color[16] {
-            Color.white, Color.black, Color.red, Color.green,
-            Color.blue, Color.cyan, Color.magenta, Color.yellow,
-            new Color(0.75f, 0.75f, 0.75f),
-            new Color(0.25f, 0.25f, 0.25f),
-            new Color(0.5f, 0.0f, 0.0f),
-            new Color(0.0f, 0.5f, 0.0f),
-            new Color(0.0f, 0.0f, 0.5f),
-            new Color(0.0f, 0.5f, 0.5f),
-            new Color(0.5f, 0.0f, 0.5f),
-            new Color(0.5f, 0.5f, 0.0f)
-        };
-        //define and fill textures
-        for (int i = 0; i < 16; i++)
-        {
-            MyTextures[i] = new Texture2D(1, 1);
-            MyTextures[i].SetPixel(0, 0, MyColors[i]);
-            MyTextures[i].Apply();
-        }
-        //draw field
-        for (int i = 0; i < ScreenWidth; i++)
-            for (int j = 0; j < ScreenHeight; j++)
+            ScreenWidth = Screen.width;
+            ScreenHeight = Screen.height;
+            DefineTextures();
+            if (EditorUtility.DisplayDialog("Game mode selection", "Please, select game mode", "Mode 1", "Mode 2"))
             {
-                if (Field[i, j] != 0)
+                //GameMode = 1;
+                GlassHeight = 20;
+                GlassWidth = 10;
+                FigCount = 7;
+            }
+            else
+            {
+                //GameMode = 2;
+                GlassHeight = 12;
+                GlassWidth = 20;
+                FigCount = 10;
+                Tiles.Probabilities[6] = 5.0f;
+            }
+            int ScaleX = ScreenWidth / GlassWidth;
+            int ScaleY = ScreenHeight / GlassHeight;
+            Scale = Mathf.Min(ScaleX, ScaleY);
+            Glass = new int[GlassWidth, GlassHeight];
+            PosX = GlassWidth / 2 - 2;
+            PosY = 0;
+            Rot = 0;
+        }
+        void OnGUI()
+        {
+            //draw glass
+            for (int i = 0; i < GlassWidth; i++)
+            {
+                for (int j = 0; j < GlassHeight; j++)
                 {
-                    GUI.skin.box.normal.background = MyTextures[Field[i, j]];
-                    GUI.Box(new Rect(i * 20, j * 20, 19, 19), "");
+                    GUI.skin.box.normal.background = MyTextures[Glass[i, j]];
+                    GUI.Box(new Rect(i * Scale, j * Scale, Scale, Scale), "");
                 }
             }
-    }
-    // Update is called once per frame
-    void Update ()
-    {
-        if (Input.GetKeyDown("up"))
-        {
-            //print("up key was pressed");
-            Field[5, 5] = 5;
+            //draw tile
+            GUI.skin.box.normal.background = MyTextures[CurrentFig + 2];
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (Tiles.Figures[CurrentFig, j, i] != 0)
+                    {
+                        GUI.Box(new Rect((PosX + i) * Scale, (PosY + j) * Scale, Scale, Scale), "");
+                    }
+                }
+            }
         }
-        else if (Input.GetKeyDown("down"))
+        // Update is called once per frame
+        void Update()
         {
-            //print("down key was pressed");
-            Field[4, 4] = 4;
+            CurrentFig = RandomGenerator.Generate();
+            if (Input.GetKeyDown("up"))
+                Rotate();
+            else if (Input.GetKeyDown("down"))
+                MoveDown();
+            else if (Input.GetKeyDown("right"))
+                MoveRight();
+            else if (Input.GetKeyDown("left"))
+                MoveLeft();
+            System.Threading.Thread.Sleep(1000);
+            //MoveDown();
         }
-        else if (Input.GetKeyDown("right"))
+        void Rotate()
         {
-            //print("right key was pressed");
-            Field[3, 3] = 3;
+            print("Rotate");
         }
-        else if (Input.GetKeyDown("left"))
+        void MoveDown()
         {
-            //print("left key was pressed");
-            Field[2, 2] = 2;
+            print("MoveDown");
+            //for (int j = 0; j < 4; j++)
+            //{
+            //    for (int k = 0; k < 4; k++)
+            //    {
+            //        Field[k + posx, j + posy] -= Tiles.Figures[CurrentFig, j, k];
+            //        posy++;
+            //        Field[k + posx, j + posy] += Tiles.Figures[CurrentFig, j, k];
+            //    }
+            //}
         }
-
+        void MoveRight()
+        {
+            print("MoveRight");
+        }
+        void MoveLeft()
+        {
+            print("MoveLeft");
+        }
+        void DefineTextures()
+        {
+            //define color palette
+            Color[] MyColors = new Color[16]
+            {
+                Color.white,
+                Color.black,
+                Color.red,
+                Color.green,
+                Color.blue,
+                Color.cyan,
+                Color.magenta,
+                Color.yellow,
+                new Color(0.75f, 0.75f, 0.75f),
+                new Color(0.25f, 0.25f, 0.25f),
+                new Color(0.5f, 0.0f, 0.0f),
+                new Color(0.0f, 0.5f, 0.0f),
+                new Color(0.0f, 0.0f, 0.5f),
+                new Color(0.0f, 0.5f, 0.5f),
+                new Color(0.5f, 0.0f, 0.5f),
+                new Color(0.5f, 0.5f, 0.0f)
+            };
+            //define and fill textures
+            for (int i = 0; i < 16; i++)
+            {
+                MyTextures[i] = new Texture2D(1, 1);
+                MyTextures[i].SetPixel(0, 0, MyColors[i]);
+                MyTextures[i].Apply();
+            }
+        }
     }
 }
