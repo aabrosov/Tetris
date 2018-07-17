@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 14
-  productGUID: cb7a20127568129439385112061832ff
+  productGUID: 303601d609d14bc4fbda551177f016c9
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   defaultScreenOrientation: 4
@@ -634,8 +634,8 @@ PlayerSettings:
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: 80932d4d-97fe-4a00-9564-9704bdefec59
-  projectName: Unity-Tetris (1)
+  cloudProjectId: d015369e-40e9-4db7-8969-f6f54a797294
+  projectName: Unity-Tetris (2)
   organizationId: aabrosov
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
