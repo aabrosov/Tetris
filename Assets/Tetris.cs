@@ -41,21 +41,22 @@ namespace Tetris
         private static int GlassHeight;
         private static int[,] Glass;
         private static int[,] Figure;
+        private static int[,] Moved;
         private static int Scale;
         private static int CurrentFig;
         private static int PosX;
         private static int PosY;
         public static Figure[] Figures = {
                 new Figure( new Color(1.0f,0.0f,0.0f), new int[,] {{0,0,0,0},{0,1,1,0},{0,1,1,0},{0,0,0,0}}, 10 ),
-                new Figure( new Color(0.0f,1.0f,0.0f), new int[,] {{0,0,0,0},{1,1,0,0},{0,1,1,0},{0,0,0,0}}, 15 ),
-                new Figure( new Color(0.0f,0.0f,1.0f), new int[,] {{0,0,0,0},{0,1,1,0},{1,1,0,0},{0,0,0,0}}, 15 ),
-                new Figure( new Color(0.0f,1.0f,1.0f), new int[,] {{0,0,0,0},{0,0,1,0},{1,1,1,0},{0,0,0,0}}, 15 ),
-                new Figure( new Color(1.0f,0.0f,1.0f), new int[,] {{0,0,0,0},{1,0,0,0},{1,1,1,0},{0,0,0,0}}, 15 ),
-                new Figure( new Color(1.0f,1.0f,0.0f), new int[,] {{0,0,0,0},{0,0,0,0},{1,1,1,1},{0,0,0,0}}, 10 ),
-                new Figure( new Color(0.5f,1.0f,1.0f), new int[,] {{0,0,0,0},{0,1,0,0},{1,1,1,0},{0,0,0,0}}, 20 ),
+                new Figure( new Color(0.0f,1.0f,0.0f), new int[,] {{0,0,0,0},{0,0,1,0},{0,1,1,0},{0,1,0,0}}, 15 ),
+                new Figure( new Color(0.0f,0.0f,1.0f), new int[,] {{0,0,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0}}, 15 ),
+                new Figure( new Color(0.0f,1.0f,1.0f), new int[,] {{0,0,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,0}}, 15 ),
+                new Figure( new Color(1.0f,0.0f,1.0f), new int[,] {{0,0,0,0},{0,0,1,0},{0,0,1,0},{0,1,1,0}}, 15 ),
+                new Figure( new Color(1.0f,1.0f,0.0f), new int[,] {{0,0,1,0},{0,0,1,0},{0,0,1,0},{0,0,1,0}}, 10 ),
+                new Figure( new Color(0.5f,1.0f,1.0f), new int[,] {{0,0,0,0},{0,0,1,0},{0,1,1,0},{0,0,1,0}}, 20 ),
                 new Figure( new Color(1.0f,0.5f,1.0f), new int[,] {{0,0,0,0},{0,1,0,0},{1,1,1,0},{0,1,0,0}},  5 ),
-                new Figure( new Color(1.0f,1.0f,0.5f), new int[,] {{0,0,0,0},{1,1,1,0},{1,0,1,0},{0,0,0,0}},  5 ),
-                new Figure( new Color(1.0f,0.5f,0.5f), new int[,] {{0,0,0,0},{1,0,0,0},{1,1,0,0},{0,1,1,0}},  5 )
+                new Figure( new Color(1.0f,1.0f,0.5f), new int[,] {{0,0,0,0},{0,1,1,0},{0,1,0,0},{0,1,1,0}},  5 ),
+                new Figure( new Color(1.0f,0.5f,0.5f), new int[,] {{0,0,0,0},{0,0,0,1},{0,0,1,1},{0,1,1,0}},  5 )
             };
         public static int FigCount;
         public Texture2D[] MyTextures;
@@ -91,9 +92,7 @@ namespace Tetris
             int ScaleY = ScreenHeight / GlassHeight;
             Scale = Mathf.Min(ScaleX, ScaleY);
             Glass = new int[GlassWidth, GlassHeight];
-            Figure = new int[GlassWidth, GlassHeight];
-            PosX = GlassWidth / 2 - 2;
-            PosY = 0;
+            InitFigure();
         }
         void OnGUI()
         {
@@ -118,6 +117,27 @@ namespace Tetris
         // Update is called once per frame
         void Update()
         {
+            Moved = new int[GlassWidth, GlassHeight];
+            if (Input.GetKeyDown("up"))
+                RotateRight();
+            else if (Input.GetKeyDown("home"))
+                RotateLeft();
+            else if (Input.GetKeyDown("end"))
+                RotateRight();
+            else if (Input.GetKeyDown("down"))
+                MoveDown();
+            else if (Input.GetKeyDown("left"))
+                MoveLeft();
+            else if (Input.GetKeyDown("right"))
+                MoveRight();
+            //System.Threading.Thread.Sleep(1000);
+            //MoveDown();
+        }
+        void InitFigure()
+        {
+            Figure = new int[GlassWidth, GlassHeight];
+            PosX = GlassWidth / 2 - 2;
+            PosY = 0;
             CurrentFig = Select.Figure();
             for (int i = 0; i < 4; i++)
             {
@@ -126,20 +146,14 @@ namespace Tetris
                     Figure[i + PosX, j + PosY] = Figures[CurrentFig].tiles[i, j];
                 }
             }
-            if (Input.GetKeyDown("up"))
-                Rotate();
-            else if (Input.GetKeyDown("down"))
-                MoveDown();
-            else if (Input.GetKeyDown("right"))
-                MoveRight();
-            else if (Input.GetKeyDown("left"))
-                MoveLeft();
-            System.Threading.Thread.Sleep(1000);
-            //MoveDown();
         }
-        void Rotate()
+        void RotateRight()
         {
-            print("Rotate");
+            print("RotateRight");
+        }
+        void RotateLeft()
+        {
+            print("RotateLeft");
         }
         void MoveDown()
         {
@@ -148,10 +162,68 @@ namespace Tetris
         void MoveRight()
         {
             print("MoveRight");
+            //check is it ok to move right
+            bool RightColumn = false;
+            int ii = GlassWidth - 1;
+            for (int j = 0; j < GlassHeight; j++)
+            {
+                if (Figure[ii, j] != 0)
+                {
+                    RightColumn = true;
+                }
+            }
+            for (int i = 0; i < GlassWidth - 1; i++)
+            {
+                for (int j = 0; j < GlassHeight; j++)
+                {
+                    Moved[i + 1, j] = Figure[i, j];
+                }
+            }
+            if (!RightColumn & !Check(Glass, Moved))
+            {
+                Figure = Moved;
+            }
         }
         void MoveLeft()
         {
             print("MoveLeft");
+            //check is it ok to move left
+            bool LeftColumn = false;
+            int ii = 0;
+            for (int j = 0; j < GlassHeight; j++)
+            {
+                if(Figure[ii, j] != 0)
+                {
+                    LeftColumn = true;
+                }
+            }
+            for (int i = 0; i < GlassWidth - 1; i++)
+            {
+                for (int j = 0; j < GlassHeight; j++)
+                {
+                    Moved[i, j] = Figure[i + 1, j];
+                }
+            }
+            if(!LeftColumn & !Check(Glass, Moved))
+            {
+                Figure = Moved;
+            }
+        }
+        bool Check(int[,] array1, int[,] array2)
+        {
+            //check arrays intersection
+            bool Intersection = false;
+            for (int i = 0; i < GlassWidth; i++)
+            {
+                for (int j = 0; j < GlassHeight; j++)
+                {
+                    if (array1[i, j] != 0 & array2[i, j] != 0)
+                    {
+                        Intersection = true;
+                    }
+                }
+            }
+            return Intersection;
         }
     }
 }
