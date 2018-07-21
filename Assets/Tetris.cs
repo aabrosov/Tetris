@@ -33,6 +33,19 @@ namespace Tetris
             this.probability = probability;
         }
     }
+    public class Position
+    {
+        public int x;
+        public int y;
+        public int r;
+        public Position() { }
+        public Position(int x, int y, int r)
+        {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+        }
+    }
     public class Tetris : MonoBehaviour
     {
         private static int ScreenWidth;
@@ -44,10 +57,16 @@ namespace Tetris
         private static int[,] Moved;
         private static int Scale;
         private static int CurrentFig;
-        private static int PosX;
-        private static int PosY;
+        //private static int PosX;
+        //private static int PosY;
+        private static Position before = new Position();
         public static Figure[] Figures = {
-                new Figure( new Color(1.0f,0.0f,0.0f), new int[,] {{0,0,0,0},{0,1,1,0},{0,1,1,0},{0,0,0,0}}, 10 ),
+                new Figure( new Color(1.0f,0.0f,0.0f), new int[,] {
+                    {0,0,0,0},
+                    {0,1,1,0},
+                    {0,1,1,0},
+                    {0,0,0,0}
+                }, 10 ),
                 new Figure( new Color(0.0f,1.0f,0.0f), new int[,] {{0,0,0,0},{0,0,1,0},{0,1,1,0},{0,1,0,0}}, 15 ),
                 new Figure( new Color(0.0f,0.0f,1.0f), new int[,] {{0,0,0,0},{0,1,0,0},{0,1,1,0},{0,0,1,0}}, 15 ),
                 new Figure( new Color(0.0f,1.0f,1.0f), new int[,] {{0,0,0,0},{0,1,1,0},{0,0,1,0},{0,0,1,0}}, 15 ),
@@ -92,7 +111,9 @@ namespace Tetris
             int ScaleY = ScreenHeight / GlassHeight;
             Scale = Mathf.Min(ScaleX, ScaleY);
             Glass = new int[GlassWidth, GlassHeight];
-            InitFigure();
+            Position position = new Position(GlassWidth / 2 - 2, 0, 0);
+            CurrentFig = Select.Figure();
+            InitFigure(position, CurrentFig);
         }
         void OnGUI()
         {
@@ -117,113 +138,65 @@ namespace Tetris
         // Update is called once per frame
         void Update()
         {
-            Moved = new int[GlassWidth, GlassHeight];
+            //Moved = new int[GlassWidth, GlassHeight];
+            Position after = new Position();
+            after = before;
             if (Input.GetKeyDown("up"))
-                RotateRight();
-            else if (Input.GetKeyDown("home"))
-                RotateLeft();
-            else if (Input.GetKeyDown("end"))
-                RotateRight();
+                after.r += 90;
+            else if (Input.GetKeyDown("a"))
+                after.r -= 90;
+            else if (Input.GetKeyDown("d"))
+                after.r += 90;
             else if (Input.GetKeyDown("down"))
-                MoveDown();
+                after.y += 1;
             else if (Input.GetKeyDown("left"))
-                MoveLeft();
+                after.x -= 1;
             else if (Input.GetKeyDown("right"))
-                MoveRight();
-            //System.Threading.Thread.Sleep(1000);
-            //MoveDown();
+                after.x += 1;
+            InitFigure(after, CurrentFig);
         }
-        void InitFigure()
+        void InitFigure(Position pos, int CurrentFig)
         {
             Figure = new int[GlassWidth, GlassHeight];
-            PosX = GlassWidth / 2 - 2;
-            PosY = 0;
-            CurrentFig = Select.Figure();
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    Figure[i + PosX, j + PosY] = Figures[CurrentFig].tiles[i, j];
+                    Figure[i + pos.x, j + pos.y] = Rotated(pos.r, GetFigure(CurrentFig))[i,j];
                 }
             }
         }
-        void RotateRight()
+        int[,] GetFigure(int CurrentFig)
         {
-            print("RotateRight");
-        }
-        void RotateLeft()
-        {
-            print("RotateLeft");
-        }
-        void MoveDown()
-        {
-            print("MoveDown");
-        }
-        void MoveRight()
-        {
-            print("MoveRight");
-            //check is it ok to move right
-            bool RightColumn = false;
-            int ii = GlassWidth - 1;
-            for (int j = 0; j < GlassHeight; j++)
+            int[,] Figure = new int[4, 4];
+            for (int i = 0; i < 4; i++)
             {
-                if (Figure[ii, j] != 0)
+                for (int j = 0; j < 4; j++)
                 {
-                    RightColumn = true;
+                    Figure[i, j] = Figures[CurrentFig].tiles[i, j];
                 }
             }
-            for (int i = 0; i < GlassWidth - 1; i++)
-            {
-                for (int j = 0; j < GlassHeight; j++)
-                {
-                    Moved[i + 1, j] = Figure[i, j];
-                }
-            }
-            if (!RightColumn & !Check(Glass, Moved))
-            {
-                Figure = Moved;
-            }
+            return Figure;
         }
-        void MoveLeft()
+        int[,] Rotated(int angle, int[,] figure)
         {
-            print("MoveLeft");
-            //check is it ok to move left
-            bool LeftColumn = false;
-            int ii = 0;
-            for (int j = 0; j < GlassHeight; j++)
-            {
-                if(Figure[ii, j] != 0)
-                {
-                    LeftColumn = true;
-                }
-            }
-            for (int i = 0; i < GlassWidth - 1; i++)
-            {
-                for (int j = 0; j < GlassHeight; j++)
-                {
-                    Moved[i, j] = Figure[i + 1, j];
-                }
-            }
-            if(!LeftColumn & !Check(Glass, Moved))
-            {
-                Figure = Moved;
-            }
-        }
-        bool Check(int[,] array1, int[,] array2)
-        {
-            //check arrays intersection
-            bool Intersection = false;
-            for (int i = 0; i < GlassWidth; i++)
-            {
-                for (int j = 0; j < GlassHeight; j++)
-                {
-                    if (array1[i, j] != 0 & array2[i, j] != 0)
-                    {
-                        Intersection = true;
-                    }
-                }
-            }
-            return Intersection;
+            angle = angle % 360;
+            if (angle == 0)
+                return figure;
+            int [,] Temp = new int[4, 4];
+            if (angle == 90)
+                for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                        Temp[i, j] = figure[j, 3 - i];
+            if (angle == 180)
+                for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                        Temp[i, j] = figure[3 - i, 3 - j];
+            if (angle == 270)
+                for (int i = 0; i < 4; i++)
+                    for (int j = 0; j < 4; j++)
+                        Temp[i, j] = figure[3 - j, i];
+            return Temp;
         }
     }
 }
