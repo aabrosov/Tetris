@@ -4,25 +4,6 @@ using System.Collections;
 
 namespace Tetris
 {
-    public class Select
-    {
-        public static Figure Figure()
-        {
-            float rnd = Random.Range(0.0f, 100.0f);
-            float LimitLeft = 0.0f;
-            float LimitRight = 0.0f;
-            for (int i = 0; i < Tetris.FigCount; i++)
-            {
-                LimitLeft = LimitRight;
-                LimitRight = LimitLeft + Tetris.Figures[i].probability;
-                if (rnd >= LimitLeft & rnd <= LimitRight)
-                {
-                    return Tetris.Figures[i];
-                }
-            }
-            return null;
-        }
-    }
     public class Figure
     {
         public Color color;
@@ -50,9 +31,6 @@ namespace Tetris
         private static int GameMode;
         private static int Scale;
         private static Figure CurrentFig = new Figure();
-        //private static int PosX;
-        //private static int PosY;
-        //private static Position position = new Position();
         public static Figure[] Figures = {
             new Figure(new Color(1.0f, 0.0f, 0.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, { 1, 1 } }, 10, false),
             new Figure(new Color(0.0f, 1.0f, 0.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, {-1, 1 }, {-1, 1 } }, 15, true),
@@ -96,7 +74,7 @@ namespace Tetris
             int ScaleY = ScreenHeight / (GlassHeight + 1);
             Scale = Mathf.Min(ScaleX, ScaleY);
             Glass = new Color[GlassWidth, GlassHeight];
-            CurrentFig = Select.Figure();
+            CurrentFig = Select();
             CurrentFig.positionx = GlassWidth / 2;
             CurrentFig.positiony = 1;
             for (int i = 0; i < 5; i++)
@@ -134,48 +112,130 @@ namespace Tetris
         // Update is called once per frame
         void Update()
         {
+            int newx, newy;
             for (int i = 0; i < 5; i++)
             {
-                Glass[CurrentFig.tiles[i, 0] + CurrentFig.positionx, CurrentFig.tiles[i, 1] + CurrentFig.positiony] = Color.white;
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                if (newx < 0) newx += GlassWidth;
+                if (newx >= GlassWidth) newx -= GlassWidth;
+                Glass[newx, newy] = Color.white;
             }
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-                CurrentFig = RotateLeft(CurrentFig);
-            else if (Input.GetKeyDown("a"))
-                CurrentFig = RotateRight(CurrentFig);
-            else if (Input.GetKeyDown("d"))
-                CurrentFig = RotateLeft(CurrentFig);
-            else if (Input.GetKeyDown("down"))
-                CurrentFig.positiony += 1;
-            else if (Input.GetKeyDown("left"))
-                CurrentFig.positionx -= 1;
-            else if (Input.GetKeyDown("right"))
-                CurrentFig.positionx += 1;
+            string UserInput = CheckUserInput();
+            bool checkleft = false;
+            bool checkright = false;
+            bool checktop = false;
+            bool checkbottom = false;
+            bool checkoverlay = false;
+            bool checkfix = false;
             for (int i = 0; i < 5; i++)
             {
-                Glass[CurrentFig.tiles[i, 0] + CurrentFig.positionx, CurrentFig.tiles[i, 1] + CurrentFig.positiony] = CurrentFig.color;
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                if (GameMode == 1 & newx < 0)
+                {
+                    checkleft = true;
+                    break;
+                }
+                if (GameMode == 1 & newx >= GlassWidth)
+                {
+                    checkright = true;
+                    break;
+                }
+                if (newy < 0)
+                {
+                    checktop = true;
+                    break;
+                }
+                if (newy >= GlassHeight)
+                {
+                    checkbottom = true;
+                    break;
+                }
             }
-            //System.Threading.Thread.Sleep(5000);
-            //DropFigure();
+            if (GameMode == 1 & (checkleft | checkright))
+            {
+                Rollback(UserInput);
+            }
+            else if (checktop | checkbottom)
+            {
+                Rollback(UserInput);
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+                if (newx < 0) newx += GlassWidth;
+                if (newx >= GlassWidth) newx -= GlassWidth;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                Glass[newx, newy] = CurrentFig.color;
+            }
         }
-        //void DropFigure()
-        //{
-        //    dropped = new Color[GlassWidth, GlassHeight];
-        //    for (int i = 0; i < 5; i++)
-        //    {
-        //        dropped[CurrentFig.tiles[i, 0] + CurrentFig.positionx, CurrentFig.tiles[i, 1] + CurrentFig.positiony] = CurrentFig.color;
-        //    }
-        //}
+        string CheckUserInput()
+        {
+            string UserInput = "";
+            if (Input.GetKeyDown("up"))
+            {
+                CurrentFig = RotateLeft(CurrentFig);
+                UserInput = "RotateLeft";
+            }
+            else if (Input.GetKeyDown("a"))
+            {
+                CurrentFig = RotateRight(CurrentFig);
+                UserInput = "RotateRight";
+            }
+            else if (Input.GetKeyDown("d"))
+            {
+                CurrentFig = RotateLeft(CurrentFig);
+                UserInput = "RotateLeft";
+            }
+            else if (Input.GetKeyDown("down"))
+            {
+                CurrentFig.positiony += 1;
+                UserInput = "MoveDown";
+            }
+            else if (Input.GetKeyDown("left"))
+            {
+                CurrentFig.positionx -= 1;
+                UserInput = "MoveLeft";
+            }
+            else if (Input.GetKeyDown("right"))
+            {
+                CurrentFig.positionx += 1;
+                UserInput = "MoveRight";
+            }
+            return UserInput;
+        }
+        void Rollback(string UserInput)
+        {
+            switch (UserInput)
+            {
+                case "RotateLeft":
+                    CurrentFig = RotateRight(CurrentFig);
+                    break;
+                case "RotateRight":
+                    CurrentFig = RotateLeft(CurrentFig);
+                    break;
+                case "MoveDown":
+                    CurrentFig.positiony -= 1;
+                    break;
+                case "MoveRight":
+                    CurrentFig.positionx -= 1;
+                    break;
+                case "MoveLeft":
+                    CurrentFig.positionx += 1;
+                    break;
+            }
+        }
         Figure RotateLeft(Figure figure)
         {
             if (figure.allowrotate)
             {
-                int x, y;
+                int temp;
                 for (int i = 0; i < 5; i++)
                 {
-                    x = +figure.tiles[i, 1];
-                    y = -figure.tiles[i, 0];
-                    figure.tiles[i, 0] = x;
-                    figure.tiles[i, 1] = y;
+                    temp = -figure.tiles[i, 0];
+                    figure.tiles[i, 0] = figure.tiles[i, 1];
+                    figure.tiles[i, 1] = temp;
                 }
             }
             return figure;
@@ -184,16 +244,31 @@ namespace Tetris
         {
             if (figure.allowrotate)
             {
-                int x, y;
+                int temp;
                 for (int i = 0; i < 5; i++)
                 {
-                    x = -figure.tiles[i, 1];
-                    y = +figure.tiles[i, 0];
-                    figure.tiles[i, 0] = x;
-                    figure.tiles[i, 1] = y;
+                    temp = figure.tiles[i, 0];
+                    figure.tiles[i, 0] = -figure.tiles[i, 1];
+                    figure.tiles[i, 1] = temp;
                 }
             }
             return figure;
+        }
+        public static Figure Select()
+        {
+            float rnd = Random.Range(0.0f, 100.0f);
+            float LimitLeft = 0.0f;
+            float LimitRight = 0.0f;
+            for (int i = 0; i < FigCount; i++)
+            {
+                LimitLeft = LimitRight;
+                LimitRight = LimitLeft + Figures[i].probability;
+                if (rnd >= LimitLeft & rnd <= LimitRight)
+                {
+                    return Figures[i];
+                }
+            }
+            return null;
         }
     }
 }
