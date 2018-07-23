@@ -77,10 +77,14 @@ namespace Tetris
             CurrentFig = Select();
             CurrentFig.positionx = GlassWidth / 2;
             CurrentFig.positiony = 1;
-            for (int i = 0; i < 5; i++)
-            {
-                Glass[CurrentFig.tiles[i, 0] + CurrentFig.positionx, CurrentFig.tiles[i, 1] + CurrentFig.positiony] = CurrentFig.color;
-            }
+            //int newx, newy;
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+            //    Glass[newx, newy] = CurrentFig.color;
+            //}
+            PutFigure(CurrentFig.color);
         }
         void OnGUI()
         {
@@ -113,14 +117,21 @@ namespace Tetris
         void Update()
         {
             int newx, newy;
-            for (int i = 0; i < 5; i++)
-            {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
-                if (newx < 0) newx += GlassWidth;
-                if (newx >= GlassWidth) newx -= GlassWidth;
-                Glass[newx, newy] = Color.white;
-            }
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+            //    while (newx < 0)
+            //    {
+            //        newx += GlassWidth;
+            //    }
+            //    if (newx >= GlassWidth)
+            //    {
+            //        newx %= GlassWidth;
+            //    }
+            //    Glass[newx, newy] = Color.white;
+            //}
+            PutFigure(Color.white);
             string UserInput = CheckUserInput();
             bool checkleft = false;
             bool checkright = false;
@@ -153,39 +164,42 @@ namespace Tetris
                     break;
                 }
             }
-            if (GameMode == 1 & (checkleft | checkright))
+            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom)
             {
                 Rollback(UserInput);
             }
-            else if (checktop | checkbottom)
-            {
-                Rollback(UserInput);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-                if (newx < 0) newx += GlassWidth;
-                if (newx >= GlassWidth) newx -= GlassWidth;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
-                Glass[newx, newy] = CurrentFig.color;
-            }
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+            //    while (newx < 0)
+            //    {
+            //        newx += GlassWidth;
+            //    }
+            //    if (newx >= GlassWidth)
+            //    {
+            //        newx %= GlassWidth;
+            //    }
+            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+            //    Glass[newx, newy] = CurrentFig.color;
+            //}
+            PutFigure(CurrentFig.color);
         }
         string CheckUserInput()
         {
             string UserInput = "";
             if (Input.GetKeyDown("up"))
             {
-                CurrentFig = RotateLeft(CurrentFig);
+                Rotate(1);
                 UserInput = "RotateLeft";
             }
             else if (Input.GetKeyDown("a"))
             {
-                CurrentFig = RotateRight(CurrentFig);
+                Rotate(-1);
                 UserInput = "RotateRight";
             }
             else if (Input.GetKeyDown("d"))
             {
-                CurrentFig = RotateLeft(CurrentFig);
+                Rotate(1);
                 UserInput = "RotateLeft";
             }
             else if (Input.GetKeyDown("down"))
@@ -210,10 +224,10 @@ namespace Tetris
             switch (UserInput)
             {
                 case "RotateLeft":
-                    CurrentFig = RotateRight(CurrentFig);
+                    Rotate(-1);
                     break;
                 case "RotateRight":
-                    CurrentFig = RotateLeft(CurrentFig);
+                    Rotate(1);
                     break;
                 case "MoveDown":
                     CurrentFig.positiony -= 1;
@@ -226,33 +240,40 @@ namespace Tetris
                     break;
             }
         }
-        Figure RotateLeft(Figure figure)
+        void Rotate(int direction)
         {
-            if (figure.allowrotate)
+            if (direction != -1)
+            {
+                direction = 1;
+            }
+            if (CurrentFig.allowrotate)
             {
                 int temp;
                 for (int i = 0; i < 5; i++)
                 {
-                    temp = -figure.tiles[i, 0];
-                    figure.tiles[i, 0] = figure.tiles[i, 1];
-                    figure.tiles[i, 1] = temp;
+                    temp = -CurrentFig.tiles[i, 0];
+                    CurrentFig.tiles[i, 0] = direction * CurrentFig.tiles[i, 1];
+                    CurrentFig.tiles[i, 1] = direction * temp;
                 }
             }
-            return figure;
         }
-        Figure RotateRight(Figure figure)
+        void PutFigure(Color color)
         {
-            if (figure.allowrotate)
+            int newx, newy;
+            for (int i = 0; i < 5; i++)
             {
-                int temp;
-                for (int i = 0; i < 5; i++)
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                while (newx < 0)
                 {
-                    temp = figure.tiles[i, 0];
-                    figure.tiles[i, 0] = -figure.tiles[i, 1];
-                    figure.tiles[i, 1] = temp;
+                    newx += GlassWidth;
                 }
+                if (newx >= GlassWidth)
+                {
+                    newx %= GlassWidth;
+                }
+                Glass[newx, newy] = color;
             }
-            return figure;
         }
         public static Figure Select()
         {
