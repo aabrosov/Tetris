@@ -7,15 +7,17 @@ namespace Tetris
     public class Figure
     {
         public Color color;
+        public int count;
         public int[,] tiles;
         public int probability;
         public bool allowrotate;
-        public int positionx;
-        public int positiony;
+        public int x;
+        public int y;
         public Figure() { }
-        public Figure(Color color, int[,] tiles, int probability, bool allowrotate)
+        public Figure(Color color, int count, int[,] tiles, int probability, bool allowrotate)
         {
             this.color = color;
+            this.count = count;
             this.tiles = tiles;
             this.probability = probability;
             this.allowrotate = allowrotate;
@@ -32,16 +34,16 @@ namespace Tetris
         private static int Scale;
         private static Figure CurrentFig = new Figure();
         public static Figure[] Figures = {
-            new Figure(new Color(1.0f, 0.0f, 0.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, { 1, 1 } }, 10, false),
-            new Figure(new Color(0.0f, 1.0f, 0.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, {-1, 1 }, {-1, 1 } }, 15, true),
-            new Figure(new Color(0.0f, 0.0f, 1.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 1, 1 }, {-1, 0 }, {-1, 0 } }, 15, true),
-            new Figure(new Color(0.0f, 1.0f, 1.0f), new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1, 1 }, { 1, 1 } }, 15, true),
-            new Figure(new Color(1.0f, 0.0f, 1.0f), new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, {-1, 1 }, {-1, 1 } }, 15, true),
-            new Figure(new Color(1.0f, 1.0f, 0.0f), new int[,] { { 2, 0 }, { 1, 0 }, { 0, 0 }, {-1, 0 }, {-1, 0 } }, 10, true),
-            new Figure(new Color(0.8f, 0.0f, 0.0f), new int[,] { { 0, 0 }, { 1, 0 }, { 0, 1 }, {-1, 0 }, {-1, 0 } }, 20, true),
-            new Figure(new Color(0.0f, 0.8f, 0.0f), new int[,] { { 0, 0 }, { 0, 1 }, { 0,-1 }, { 1, 0 }, {-1, 0 } }, 5, false),
-            new Figure(new Color(0.0f, 0.0f, 0.8f), new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1, 1 }, {-1, 1 } }, 5, true),
-            new Figure(new Color(0.0f, 0.8f, 0.8f), new int[,] { { 0, 0 }, { 1,-1 }, { 0,-1 }, {-1, 0 }, {-1, 1 } }, 5, true),
+            new Figure(Color.red,     4, new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } }, 10, false),
+            new Figure(Color.green,   4, new int[,] { { 0, 0 }, { 0,-1 }, { 1, 0 }, {-1,-1 } }, 15, true),
+            new Figure(Color.blue,    4, new int[,] { { 0, 0 }, { 0,-1 }, { 1,-1 }, {-1, 0 } }, 15, true),
+            new Figure(Color.cyan,    4, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1,-1 } }, 15, true),
+            new Figure(Color.magenta, 4, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, {-1,-1 } }, 15, true),
+            new Figure(Color.yellow,  4, new int[,] { { 2, 0 }, { 1, 0 }, { 0, 0 }, {-1, 0 } }, 10, true),
+            new Figure(new Color(0.8f, 0.0f, 0.0f), 4, new int[,] { { 0, 0 }, { 1, 0 }, { 0,-1 }, {-1, 0 } }, 20, true),
+            new Figure(new Color(0.0f, 0.8f, 0.0f), 5, new int[,] { { 0, 0 }, { 0, 1 }, { 0,-1 }, { 1, 0 }, {-1, 0 } }, 5, false),
+            new Figure(new Color(0.0f, 0.0f, 0.8f), 5, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1,-1 }, {-1,-1 } }, 5, true),
+            new Figure(new Color(0.0f, 0.8f, 0.8f), 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, {-1, 0 }, {-1,-1 } }, 5, true),
         };
         public static int FigCount;
         // Use this for initialization
@@ -74,16 +76,17 @@ namespace Tetris
             int ScaleY = ScreenHeight / (GlassHeight + 1);
             Scale = Mathf.Min(ScaleX, ScaleY);
             Glass = new Color[GlassWidth, GlassHeight];
+            for (int i = 0; i < GlassWidth; i++)
+            {
+                for (int j = 0; j < GlassHeight; j++)
+                {
+                    Glass[i, j] = Color.white;
+                }
+            }
+            Glass[5, 8] = Color.red;
             CurrentFig = Select();
-            CurrentFig.positionx = GlassWidth / 2;
-            CurrentFig.positiony = 1;
-            //int newx, newy;
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
-            //    Glass[newx, newy] = CurrentFig.color;
-            //}
+            CurrentFig.x = GlassWidth / 2;
+            CurrentFig.y = 1;
             PutFigure(CurrentFig.color);
         }
         void OnGUI()
@@ -116,21 +119,6 @@ namespace Tetris
         // Update is called once per frame
         void Update()
         {
-            int newx, newy;
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
-            //    while (newx < 0)
-            //    {
-            //        newx += GlassWidth;
-            //    }
-            //    if (newx >= GlassWidth)
-            //    {
-            //        newx %= GlassWidth;
-            //    }
-            //    Glass[newx, newy] = Color.white;
-            //}
             PutFigure(Color.white);
             string UserInput = CheckUserInput();
             bool checkleft = false;
@@ -139,10 +127,11 @@ namespace Tetris
             bool checkbottom = false;
             bool checkoverlay = false;
             bool checkfix = false;
-            for (int i = 0; i < 5; i++)
+            int newx, newy;
+            for (int i = 0; i < CurrentFig.count; i++)
             {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
                 if (GameMode == 1 & newx < 0)
                 {
                     checkleft = true;
@@ -163,25 +152,16 @@ namespace Tetris
                     checkbottom = true;
                     break;
                 }
+                if(Glass[newx, newy] != Color.white)
+                {
+                    checkoverlay = true;
+                    break;
+                }
             }
-            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom)
+            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom | checkoverlay)
             {
                 Rollback(UserInput);
             }
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-            //    while (newx < 0)
-            //    {
-            //        newx += GlassWidth;
-            //    }
-            //    if (newx >= GlassWidth)
-            //    {
-            //        newx %= GlassWidth;
-            //    }
-            //    newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
-            //    Glass[newx, newy] = CurrentFig.color;
-            //}
             PutFigure(CurrentFig.color);
         }
         string CheckUserInput()
@@ -204,17 +184,17 @@ namespace Tetris
             }
             else if (Input.GetKeyDown("down"))
             {
-                CurrentFig.positiony += 1;
+                CurrentFig.y += 1;
                 UserInput = "MoveDown";
             }
             else if (Input.GetKeyDown("left"))
             {
-                CurrentFig.positionx -= 1;
+                CurrentFig.x -= 1;
                 UserInput = "MoveLeft";
             }
             else if (Input.GetKeyDown("right"))
             {
-                CurrentFig.positionx += 1;
+                CurrentFig.x += 1;
                 UserInput = "MoveRight";
             }
             return UserInput;
@@ -230,13 +210,13 @@ namespace Tetris
                     Rotate(1);
                     break;
                 case "MoveDown":
-                    CurrentFig.positiony -= 1;
+                    CurrentFig.y -= 1;
                     break;
                 case "MoveRight":
-                    CurrentFig.positionx -= 1;
+                    CurrentFig.x -= 1;
                     break;
                 case "MoveLeft":
-                    CurrentFig.positionx += 1;
+                    CurrentFig.x += 1;
                     break;
             }
         }
@@ -249,7 +229,7 @@ namespace Tetris
             if (CurrentFig.allowrotate)
             {
                 int temp;
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < CurrentFig.count; i++)
                 {
                     temp = -CurrentFig.tiles[i, 0];
                     CurrentFig.tiles[i, 0] = direction * CurrentFig.tiles[i, 1];
@@ -260,10 +240,10 @@ namespace Tetris
         void PutFigure(Color color)
         {
             int newx, newy;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < CurrentFig.count; i++)
             {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.positionx;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.positiony;
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
                 while (newx < 0)
                 {
                     newx += GlassWidth;
