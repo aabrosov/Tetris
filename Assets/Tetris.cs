@@ -4,6 +4,7 @@ using System.Collections;
 
 namespace Tetris
 {
+	//
     public class Figure
     {
         public Color color;
@@ -13,7 +14,10 @@ namespace Tetris
         public bool allowrotate;
         public int x;
         public int y;
-        public Figure() { }
+        public Figure()
+        {
+
+        }
         public Figure(Color color, int count, int[,] tiles, int probability, bool allowrotate)
         {
             this.color = color;
@@ -23,32 +27,43 @@ namespace Tetris
             this.allowrotate = allowrotate;
         }
     }
+
+    //
     public class Tetris : MonoBehaviour
     {
         private static int ScreenWidth;
         private static int ScreenHeight;
         private static int GlassWidth;
         private static int GlassHeight;
+        private static int ShiftX;
+        private static int ShiftY;
         private static Color[,] Glass;
         private static int GameMode;
         private static int Scale;
-        private static Figure CurrentFig = new Figure();
-        public static Figure[] Figures = {
-            new Figure(Color.red,     4, new int[,] { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } }, 10, false),
-            new Figure(Color.green,   4, new int[,] { { 0, 0 }, { 0,-1 }, { 1, 0 }, {-1,-1 } }, 15, true),
-            new Figure(Color.blue,    4, new int[,] { { 0, 0 }, { 0,-1 }, { 1,-1 }, {-1, 0 } }, 15, true),
-            new Figure(Color.cyan,    4, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1,-1 } }, 15, true),
-            new Figure(Color.magenta, 4, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, {-1,-1 } }, 15, true),
-            new Figure(Color.yellow,  4, new int[,] { { 2, 0 }, { 1, 0 }, { 0, 0 }, {-1, 0 } }, 10, true),
-            new Figure(new Color(0.8f, 0.0f, 0.0f), 4, new int[,] { { 0, 0 }, { 1, 0 }, { 0,-1 }, {-1, 0 } }, 20, true),
-            new Figure(new Color(0.0f, 0.8f, 0.0f), 5, new int[,] { { 0, 0 }, { 0, 1 }, { 0,-1 }, { 1, 0 }, {-1, 0 } }, 5, false),
-            new Figure(new Color(0.0f, 0.0f, 0.8f), 5, new int[,] { { 0, 0 }, { 1, 0 }, {-1, 0 }, { 1,-1 }, {-1,-1 } }, 5, true),
-            new Figure(new Color(0.0f, 0.8f, 0.8f), 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, {-1, 0 }, {-1,-1 } }, 5, true),
-        };
-        public static int FigCount;
+        private static Figure CurrentFig;
+        private static Figure[] Figures;
+        private static int FigCount;
+        private static Rect rect;
+        private static Texture2D texture;
+        private static float currenttime = 0;
+        private static float fallspeed = 1;
+
         // Use this for initialization
         void Start()
         {
+            CurrentFig = new Figure();
+            texture = new Texture2D(1, 1);
+            Figures = new Figure[10];
+            Figures[0] = new Figure(Color.red, 4, new int[,] { { 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 } }, 10, false);
+            Figures[1] = new Figure(Color.green, 4, new int[,] { { 0, 0 }, { 0, -1 }, { 1, 0 }, { -1, -1 } }, 15, true);
+            Figures[2] = new Figure(Color.blue, 4, new int[,] { { 0, 0 }, { 0, -1 }, { 1, -1 }, { -1, 0 } }, 15, true);
+            Figures[3] = new Figure(Color.cyan, 4, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, -1 } }, 15, true);
+            Figures[4] = new Figure(Color.magenta, 4, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { -1, -1 } }, 15, true);
+            Figures[5] = new Figure(Color.yellow, 4, new int[,] { { 1, 0 }, { 0, 0 }, { -1, 0 }, { -2, 0 } }, 10, true);
+            Figures[6] = new Figure(Color.red, 4, new int[,] { { 0, 0 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }, 20, true);
+            Figures[7] = new Figure(Color.green, 5, new int[,] { { 0, 0 }, { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }, 5, false);
+            Figures[8] = new Figure(Color.blue, 5, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, 1 } }, 5, true);
+            Figures[9] = new Figure(Color.cyan, 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 }, { -1, -1 } }, 5, true);
             ScreenWidth = Screen.width;
             ScreenHeight = Screen.height;
             if (EditorUtility.DisplayDialog("Game mode selection", "Please, select game mode", "Mode 1", "Mode 2"))
@@ -76,6 +91,8 @@ namespace Tetris
             int ScaleY = ScreenHeight / (GlassHeight + 1);
             Scale = Mathf.Min(ScaleX, ScaleY);
             Glass = new Color[GlassWidth, GlassHeight];
+            ShiftX = (ScreenWidth / Scale - GlassWidth - 2) / 2;
+            ShiftY = (ScreenHeight / Scale - GlassHeight - 1) / 2;
             for (int i = 0; i < GlassWidth; i++)
             {
                 for (int j = 0; j < GlassHeight; j++)
@@ -83,12 +100,14 @@ namespace Tetris
                     Glass[i, j] = Color.white;
                 }
             }
-            Glass[5, 8] = Color.red;
             CurrentFig = Select();
             CurrentFig.x = GlassWidth / 2;
-            CurrentFig.y = 1;
+            CurrentFig.y = 2;
             PutFigure(CurrentFig.color);
+            rect = new Rect();
         }
+
+        // OnGUI
         void OnGUI()
         {
             Color currentcolor;
@@ -107,15 +126,19 @@ namespace Tetris
                     }
                     if (currentcolor != Color.white)
                     {
-                        Texture2D MyTexture = new Texture2D(1, 1);
-                        MyTexture.SetPixel(0, 0, currentcolor);
-                        MyTexture.Apply();
-                        GUI.skin.box.normal.background = MyTexture;
-                        GUI.Box(new Rect((i + 1) * Scale, j * Scale, Scale, Scale), "");
+                        texture.SetPixel(0, 0, currentcolor);
+                        texture.Apply();
+                        GUI.skin.box.normal.background = texture;
+                        rect.x = (i + 1 + ShiftX) * Scale;
+                        rect.y = (j + ShiftY) * Scale;
+                        rect.width = Scale;
+                        rect.height = Scale;
+                        GUI.Box(rect, "");
                     }
                 }
             }
         }
+
         // Update is called once per frame
         void Update()
         {
@@ -142,6 +165,14 @@ namespace Tetris
                     checkright = true;
                     break;
                 }
+                while (newx < 0)
+                {
+                    newx += GlassWidth;
+                }
+                if (newx >= GlassWidth)
+                {
+                    newx %= GlassWidth;
+                }
                 if (newy < 0)
                 {
                     checktop = true;
@@ -152,11 +183,30 @@ namespace Tetris
                     checkbottom = true;
                     break;
                 }
-                if(Glass[newx, newy] != Color.white)
+                if (Glass[newx, newy] != Color.white)
                 {
                     checkoverlay = true;
                     break;
                 }
+                if (newy == GlassHeight - 1)
+                {
+                    checkfix = true;
+                    break;
+                }
+                if (newy < GlassHeight - 1 & Glass[newx, newy + 1] != Color.white)
+                {
+                    checkfix = true;
+                    break;
+                }
+            }
+            if (checkfix)
+            {
+                PutFigure(CurrentFig.color);
+                RemoveRows();
+                CurrentFig = Select();
+                CurrentFig.x = GlassWidth / 2;
+                CurrentFig.y = 2;
+                checkfix = false;
             }
             if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom | checkoverlay)
             {
@@ -164,6 +214,14 @@ namespace Tetris
             }
             PutFigure(CurrentFig.color);
         }
+
+        //
+        void RemoveRows()
+        {
+            //
+        }
+
+        //
         string CheckUserInput()
         {
             string UserInput = "";
@@ -182,10 +240,11 @@ namespace Tetris
                 Rotate(1);
                 UserInput = "RotateLeft";
             }
-            else if (Input.GetKeyDown("down"))
+            else if (Input.GetKeyDown("down") || Time.time - currenttime >= fallspeed)
             {
                 CurrentFig.y += 1;
                 UserInput = "MoveDown";
+                currenttime = Time.time;
             }
             else if (Input.GetKeyDown("left"))
             {
@@ -199,6 +258,8 @@ namespace Tetris
             }
             return UserInput;
         }
+
+        //
         void Rollback(string UserInput)
         {
             switch (UserInput)
@@ -220,6 +281,8 @@ namespace Tetris
                     break;
             }
         }
+
+        //
         void Rotate(int direction)
         {
             if (direction != -1)
@@ -237,6 +300,8 @@ namespace Tetris
                 }
             }
         }
+
+        //
         void PutFigure(Color color)
         {
             int newx, newy;
@@ -255,7 +320,9 @@ namespace Tetris
                 Glass[newx, newy] = color;
             }
         }
-        public static Figure Select()
+
+        //
+        Figure Select()
         {
             float rnd = Random.Range(0.0f, 100.0f);
             float LimitLeft = 0.0f;
