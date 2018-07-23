@@ -66,14 +66,10 @@ namespace Tetris
             Figures[9] = new Figure(Color.cyan, 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 }, { -1, -1 } }, 5, true);
             ScreenWidth = Screen.width;
             ScreenHeight = Screen.height;
-            if (EditorUtility.DisplayDialog("Game mode selection", "Please, select game mode", "Mode 1", "Mode 2"))
-            {
-                GameMode = 1;
-            }
-            else
-            {
-                GameMode = 2;
-            }
+            GameMode = 0;
+        }
+        void Init()
+        {
             if (GameMode == 1)
             {
                 GlassHeight = 20;
@@ -106,10 +102,20 @@ namespace Tetris
             PutFigure(CurrentFig.color);
             rect = new Rect();
         }
-
         // OnGUI
         void OnGUI()
         {
+            GameMode = 0;
+            GUILayout.Button("Select Game Mode");
+            if (GUILayout.Button("Mode 1"))
+                GameMode = 1;
+            if (GUILayout.Button("Mode 2"))
+                GameMode = 2;
+            if (GameMode == 1 || GameMode == 2)
+            {
+                Init();
+                GameMode = 0;
+            }
             Color currentcolor;
             //redraw Glass with walls and bottom
             for (int i = -1; i < GlassWidth + 1; i++)
