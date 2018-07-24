@@ -1,10 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 
 namespace Tetris
 {
-	//
+    //
     public class Figure
     {
         public Color color;
@@ -47,6 +46,8 @@ namespace Tetris
         private static Texture2D texture;
         private static float currenttime = 0;
         private static float fallspeed = 1;
+        private static bool[] filledraw;
+        private static bool DoInit;
 
         // Use this for initialization
         void Start()
@@ -67,43 +68,24 @@ namespace Tetris
             ScreenWidth = Screen.width;
             ScreenHeight = Screen.height;
             GameMode = 0;
+            DoInit = true;
         }
-        void Init()
-        {
-            if (GameMode == 1)
-            {
-                GlassHeight = 20;
-                GlassWidth = 10;
-                FigCount = 7;
-            }
-            else if (GameMode == 2)
-            {
-                GlassHeight = 12;
-                GlassWidth = 20;
-                FigCount = 10;
-                Figures[6].probability = 5;
-            }
-            int ScaleX = ScreenWidth / (GlassWidth + 2);
-            int ScaleY = ScreenHeight / (GlassHeight + 1);
-            Scale = Mathf.Min(ScaleX, ScaleY);
-            Glass = new Color[GlassWidth, GlassHeight];
-            ShiftX = (ScreenWidth / Scale - GlassWidth - 2) / 2;
-            ShiftY = (ScreenHeight / Scale - GlassHeight - 1) / 2;
-            for (int i = 0; i < GlassWidth; i++)
-            {
-                for (int j = 0; j < GlassHeight; j++)
-                {
-                    Glass[i, j] = Color.white;
-                }
-            }
-            CurrentFig = Select();
-            CurrentFig.x = GlassWidth / 2;
-            CurrentFig.y = 2;
-            PutFigure(CurrentFig.color);
-            rect = new Rect();
-        }
+
         // OnGUI
         void OnGUI()
+        {
+            if (DoInit)
+            {
+                Init();
+            }
+            else
+            {
+                Redraw();
+            }
+        }
+
+        //
+        void Init()
         {
             GameMode = 0;
             GUILayout.Button("Select Game Mode");
@@ -113,9 +95,49 @@ namespace Tetris
                 GameMode = 2;
             if (GameMode == 1 || GameMode == 2)
             {
-                Init();
-                GameMode = 0;
+                if (GameMode == 1)
+                {
+                    GlassHeight = 20;
+                    GlassWidth = 10;
+                    FigCount = 7;
+                }
+                else if (GameMode == 2)
+                {
+                    GlassHeight = 12;
+                    GlassWidth = 20;
+                    FigCount = 10;
+                    Figures[6].probability = 5;
+                }
+                int ScaleX = ScreenWidth / (GlassWidth + 2);
+                int ScaleY = ScreenHeight / (GlassHeight + 1);
+                Scale = Mathf.Min(ScaleX, ScaleY);
+                Glass = new Color[GlassWidth, GlassHeight];
+                ShiftX = (ScreenWidth / Scale - GlassWidth - 2) / 2;
+                ShiftY = (ScreenHeight / Scale - GlassHeight - 1) / 2;
+                for (int i = 0; i < GlassWidth; i++)
+                {
+                    for (int j = 0; j < GlassHeight; j++)
+                    {
+                        Glass[i, j] = Color.white;
+                    }
+                }
+                CurrentFig = Select();
+                CurrentFig.x = GlassWidth / 2;
+                CurrentFig.y = 2;
+                PutFigure(CurrentFig.color);
+                rect = new Rect();
+                filledraw = new bool[GlassHeight];
+                for (int j = 0; j < GlassHeight; j++)
+                {
+                    filledraw[j] = false;
+                }
+                DoInit = false;
             }
+        }
+
+        //
+        void Redraw()
+        {
             Color currentcolor;
             //redraw Glass with walls and bottom
             for (int i = -1; i < GlassWidth + 1; i++)
@@ -150,6 +172,7 @@ namespace Tetris
         {
             PutFigure(Color.white);
             string UserInput = CheckUserInput();
+            TryMove(UserInput);
             bool checkleft = false;
             bool checkright = false;
             bool checktop = false;
@@ -205,64 +228,112 @@ namespace Tetris
                     break;
                 }
             }
+            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom | checkoverlay)
+            {
+                Rollback(UserInput);
+            }
+            PutFigure(CurrentFig.color);
             if (checkfix)
             {
-                PutFigure(CurrentFig.color);
+                //PutFigure(CurrentFig.color);
                 RemoveRows();
                 CurrentFig = Select();
                 CurrentFig.x = GlassWidth / 2;
                 CurrentFig.y = 2;
                 checkfix = false;
             }
-            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom | checkoverlay)
-            {
-                Rollback(UserInput);
-            }
-            PutFigure(CurrentFig.color);
         }
 
         //
         void RemoveRows()
         {
             //
+            for (int j = 0; j < GlassHeight; j++)
+            {
+                filledraw[j] = true;
+                for (int i = 0; i < GlassWidth; i++)
+                    if (Glass[i, j] == Color.white)
+                        filledraw[j] = false;
+            }
+            int jndex = GlassHeight - 1;
+            int index = GlassHeight - 1;
+            while (jndex >= 0)
+            {
+                if (GameMode == 1)
+                {
+                    while (filledraw[index])
+                    {
+                        index--;
+                    }
+                }
+                else if (GameMode == 2 && index >= 1)
+                {
+                    while (filledraw[index] && filledraw[index - 1])
+                    {
+                        index -= 2;
+                    }
+                }
+                for (int i = 0; i < GlassWidth; i++)
+                {
+                    if (index < 0)
+                    {
+                        Glass[i, jndex] = Color.white;
+                    }
+                    else
+                    {
+                        Glass[i, jndex] = Glass[i, index];
+                    }
+                }
+                jndex--;
+                index--;
+            }
         }
 
         //
         string CheckUserInput()
         {
-            string UserInput = "";
-            if (Input.GetKeyDown("up"))
-            {
-                Rotate(1);
-                UserInput = "RotateLeft";
-            }
-            else if (Input.GetKeyDown("a"))
-            {
-                Rotate(-1);
-                UserInput = "RotateRight";
-            }
-            else if (Input.GetKeyDown("d"))
-            {
-                Rotate(1);
-                UserInput = "RotateLeft";
-            }
-            else if (Input.GetKeyDown("down") || Time.time - currenttime >= fallspeed)
-            {
-                CurrentFig.y += 1;
-                UserInput = "MoveDown";
-                currenttime = Time.time;
-            }
+            if (Input.GetKeyDown("up") || Input.GetKeyDown("l"))
+                return "RotateLeft";
+            else if (Input.GetKeyDown("r"))
+                return "RotateRight";
+            else if (Input.GetKeyDown("down"))
+                return "MoveDown";
             else if (Input.GetKeyDown("left"))
-            {
-                CurrentFig.x -= 1;
-                UserInput = "MoveLeft";
-            }
+                return "MoveLeft";
             else if (Input.GetKeyDown("right"))
+                return "MoveRight";
+            else if (Time.time - currenttime >= fallspeed)
             {
-                CurrentFig.x += 1;
-                UserInput = "MoveRight";
+                currenttime = Time.time;
+                return "FallDown";
             }
-            return UserInput;
+            return "";
+        }
+
+        //
+        void TryMove(string UserInput)
+        {
+            switch (UserInput)
+            {
+                case "RotateLeft":
+                    Rotate(1);
+                    break;
+                case "RotateRight":
+                    Rotate(-1);
+                    break;
+                case "MoveDown":
+                    CurrentFig.y += 1;
+                    break;
+                case "FallDown":
+                    CurrentFig.y += 1;
+                    break;
+                case "MoveLeft":
+                    CurrentFig.x -= 1;
+                    break;
+                case "MoveRight":
+                    CurrentFig.x += 1;
+                    break;
+            }
         }
 
         //
@@ -279,11 +350,14 @@ namespace Tetris
                 case "MoveDown":
                     CurrentFig.y -= 1;
                     break;
-                case "MoveRight":
-                    CurrentFig.x -= 1;
+                case "FallDown":
+                    CurrentFig.y -= 1;
                     break;
                 case "MoveLeft":
                     CurrentFig.x += 1;
+                    break;
+                case "MoveRight":
+                    CurrentFig.x -= 1;
                     break;
             }
         }
