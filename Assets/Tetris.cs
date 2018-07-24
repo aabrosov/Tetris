@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+﻿//using UnityEditor;
 using UnityEngine;
 
 namespace Tetris
@@ -30,11 +30,11 @@ namespace Tetris
         }
     }
 
-    //
+    /// <summary>
+    /// main class, all code is here
+    /// </summary>
     public class Tetris : MonoBehaviour
     {
-        private static int ScreenWidth;
-        private static int ScreenHeight;
         private static int GlassWidth;
         private static int GlassHeight;
         private static int ShiftX;
@@ -51,10 +51,18 @@ namespace Tetris
         private static float fallspeed = 1;
         private static bool[] FilledRaw;
         private static bool DoInit;
+        private static bool GameOver;
         private static bool NewFigure;
         private static bool DoUpdate;
 
-        // Use this for initialization
+        /// <summary>
+        /// start application
+        /// init figures array
+        /// allow init
+        /// allow new figure
+        /// stop updates
+        /// game is not over
+        /// </summary>
         void Start()
         {
             CurrentFig = new Figure();
@@ -70,20 +78,24 @@ namespace Tetris
             Figures[7] = new Figure(Color.green, 5, new int[,] { { 0, 0 }, { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }, 5, false);
             Figures[8] = new Figure(Color.blue, 5, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, 1 } }, 5, true);
             Figures[9] = new Figure(Color.cyan, 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 }, { -1, -1 } }, 5, true);
-            ScreenWidth = Screen.width;
-            ScreenHeight = Screen.height;
-            GameMode = 0;
             DoInit = true;
             NewFigure = true;
             DoUpdate = false;
+            GameOver = false;
         }
 
-        // OnGUI
+        /// <summary>
+        /// we redraw glass only if it's not init or end screen
+        /// </summary>
         void OnGUI()
         {
             if (DoInit)
             {
                 Init();
+            }
+            else if (GameOver)
+            {
+                End();
             }
             else
             {
@@ -91,15 +103,46 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// end screen
+        /// stop updating
+        /// last glass redraw
+        /// and add buttons
+        /// </summary>
+        void End()
+        {
+            DoUpdate = false;
+            Redraw();
+            GUILayout.BeginArea(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 100, 200, 200));
+            GUILayout.Label("Game Over");
+            if (GUILayout.Button("Repeat Game"))
+            {
+                Start();
+            }
+            if (GUILayout.Button("Exit"))
+            {
+                Application.Quit();
+            }
+            GUILayout.EndArea();
+        }
+
+        /// <summary>
+        /// add buttons
+        /// and if game mode selected
+        /// calculate and init some values
+        /// stop init (allow glass redraw)
+        /// allow update
+        /// </summary>
         void Init()
         {
             GameMode = 0;
-            GUILayout.Button("Select Game Mode");
+            GUILayout.BeginArea(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 70, 140, 140));
+            GUILayout.Label("Select Game Mode");
             if (GUILayout.Button("Mode 1"))
                 GameMode = 1;
             if (GUILayout.Button("Mode 2"))
                 GameMode = 2;
+            GUILayout.EndArea();
             if (GameMode == 1 || GameMode == 2)
             {
                 if (GameMode == 1)
@@ -115,12 +158,12 @@ namespace Tetris
                     FigCount = 10;
                     Figures[6].probability = 5;
                 }
-                int ScaleX = ScreenWidth / (GlassWidth + 2);
-                int ScaleY = ScreenHeight / (GlassHeight + 1);
+                int ScaleX = Screen.width / (GlassWidth + 2);
+                int ScaleY = Screen.height / (GlassHeight + 1);
                 Scale = Mathf.Min(ScaleX, ScaleY);
                 Glass = new Color[GlassWidth, GlassHeight];
-                ShiftX = (ScreenWidth / Scale - GlassWidth - 2) / 2;
-                ShiftY = (ScreenHeight / Scale - GlassHeight - 1) / 2;
+                ShiftX = (Screen.width / Scale - GlassWidth - 2) / 2;
+                ShiftY = (Screen.height / Scale - GlassHeight - 1) / 2;
                 for (int i = 0; i < GlassWidth; i++)
                 {
                     for (int j = 0; j < GlassHeight; j++)
@@ -135,11 +178,12 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// redraw Glass with walls and bottom
+        /// </summary>
         void Redraw()
         {
             Color currentcolor;
-            //redraw Glass with walls and bottom
             for (int i = -1; i < GlassWidth + 1; i++)
             {
                 for (int j = 0; j < GlassHeight + 1; j++)
@@ -167,7 +211,12 @@ namespace Tetris
             }
         }
 
-        // Update is called once per frame
+        /// <summary>
+        /// if updates not allowed do nothing
+        /// else
+        /// drop new figure to glass
+        /// or move existing
+        /// </summary>
         void Update()
         {
             if (DoUpdate)
@@ -183,17 +232,59 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// remove filled rows
+        /// select new figure
+        /// put it to the top of glass
+        /// if it overlay with glass content it's gameover
+        /// goto process mode
+        /// </summary>
         void NewFig()
         {
             RemoveRows();
             CurrentFig = Select();
             CurrentFig.x = GlassWidth / 2;
             CurrentFig.y = 2;
+            if (CheckOverlay())
+            {
+                GameOver = true;
+            }
             NewFigure = false;
         }
 
-        //
+        /// <summary>
+        /// check if CurrentFig is overlay with glass content
+        /// </summary>
+        /// <returns>
+        /// if something under figure return true
+        /// </returns>
+        bool CheckOverlay()
+        {
+            int newx, newy;
+            bool checkoverlay = false;
+            for (int i = 0; i < CurrentFig.count; i++)
+            {
+                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
+                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
+                if (Glass[newx, newy] != Color.white)
+                {
+                    checkoverlay = true;
+                    break;
+                }
+            }
+            return checkoverlay;
+        }
+
+        /// <summary>
+        /// main processing
+        /// erase current figure
+        /// get user input
+        /// try to transform figure
+        /// if something goes wrong
+        /// rolling back
+        /// put figure back
+        /// if it can be fixed, goto creation of the new figure
+        /// </summary>
         void Process()
         {
             PutFigure(Color.white);
@@ -430,7 +521,12 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// put figure into glass with color
+        /// </summary>
+        /// <param name="color">
+        /// white color used to erasing figures
+        /// </param>
         void PutFigure(Color color)
         {
             int newx, newy;
