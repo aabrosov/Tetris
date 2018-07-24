@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace Tetris
 {
-    //
+    /// <summary>
+    /// class for figure:
+    /// color, tiles count, tiles array {x,y}, probability in %, bool allowrotate?, and x&y shift
+    /// </summary>
     public class Figure
     {
         public Color color;
@@ -46,8 +49,10 @@ namespace Tetris
         private static Texture2D texture;
         private static float currenttime = 0;
         private static float fallspeed = 1;
-        private static bool[] filledraw;
+        private static bool[] FilledRaw;
         private static bool DoInit;
+        private static bool NewFigure;
+        private static bool DoUpdate;
 
         // Use this for initialization
         void Start()
@@ -69,6 +74,8 @@ namespace Tetris
             ScreenHeight = Screen.height;
             GameMode = 0;
             DoInit = true;
+            NewFigure = true;
+            DoUpdate = false;
         }
 
         // OnGUI
@@ -121,17 +128,10 @@ namespace Tetris
                         Glass[i, j] = Color.white;
                     }
                 }
-                CurrentFig = Select();
-                CurrentFig.x = GlassWidth / 2;
-                CurrentFig.y = 2;
-                PutFigure(CurrentFig.color);
                 rect = new Rect();
-                filledraw = new bool[GlassHeight];
-                for (int j = 0; j < GlassHeight; j++)
-                {
-                    filledraw[j] = false;
-                }
+                FilledRaw = new bool[GlassHeight];
                 DoInit = false;
+                DoUpdate = true;
             }
         }
 
@@ -170,11 +170,36 @@ namespace Tetris
         // Update is called once per frame
         void Update()
         {
+            if (DoUpdate)
+            {
+                if (NewFigure)
+                {
+                    NewFig();
+                }
+                else
+                {
+                    Process();
+                }
+            }
+        }
+
+        //
+        void NewFig()
+        {
+            RemoveRows();
+            CurrentFig = Select();
+            CurrentFig.x = GlassWidth / 2;
+            CurrentFig.y = 2;
+            NewFigure = false;
+        }
+
+        //
+        void Process()
+        {
             PutFigure(Color.white);
             string UserInput = CheckUserInput();
             TryMove(UserInput);
-            bool checkleft = false;
-            bool checkright = false;
+            bool checksides = false;
             bool checktop = false;
             bool checkbottom = false;
             bool checkoverlay = false;
@@ -184,14 +209,9 @@ namespace Tetris
             {
                 newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
                 newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
-                if (GameMode == 1 & newx < 0)
+                if (GameMode == 1 && (newx < 0 || newx >= GlassWidth))
                 {
-                    checkleft = true;
-                    break;
-                }
-                if (GameMode == 1 & newx >= GlassWidth)
-                {
-                    checkright = true;
+                    checksides = true;
                     break;
                 }
                 while (newx < 0)
@@ -228,7 +248,7 @@ namespace Tetris
                     break;
                 }
             }
-            if ((GameMode == 1 & (checkleft | checkright)) | checktop | checkbottom | checkoverlay)
+            if ((GameMode == 1 && checksides) | checktop | checkbottom | checkoverlay)
             {
                 Rollback(UserInput);
             }
@@ -236,60 +256,70 @@ namespace Tetris
             if (checkfix)
             {
                 //PutFigure(CurrentFig.color);
-                RemoveRows();
-                CurrentFig = Select();
-                CurrentFig.x = GlassWidth / 2;
-                CurrentFig.y = 2;
                 checkfix = false;
+                NewFigure = true;
             }
         }
 
-        //
+        /// <summary>
+        /// this function will remove filled raws
+        /// 1) scan Glass for filled raws
+        /// 2) go throw Glass from bottom to top
+        /// 3) copy all NotFilledRaws to MovedRaws
+        /// 4) add empty lines at the top
+        /// </summary>
         void RemoveRows()
         {
-            //
             for (int j = 0; j < GlassHeight; j++)
             {
-                filledraw[j] = true;
+                FilledRaw[j] = true;
                 for (int i = 0; i < GlassWidth; i++)
                     if (Glass[i, j] == Color.white)
-                        filledraw[j] = false;
+                        FilledRaw[j] = false;
             }
-            int jndex = GlassHeight - 1;
-            int index = GlassHeight - 1;
-            while (jndex >= 0)
+            int MovedRaw = GlassHeight - 1;
+            int NotFilledRaw = GlassHeight - 1;
+            while (MovedRaw >= 0)
             {
-                if (GameMode == 1)
+                if (GameMode == 1 && NotFilledRaw >= 0)
                 {
-                    while (filledraw[index])
+                    while (FilledRaw[NotFilledRaw])
                     {
-                        index--;
+                        NotFilledRaw--;
                     }
                 }
-                else if (GameMode == 2 && index >= 1)
+                else if (GameMode == 2 && NotFilledRaw >= 1)
                 {
-                    while (filledraw[index] && filledraw[index - 1])
+                    while (FilledRaw[NotFilledRaw] && FilledRaw[NotFilledRaw - 1])
                     {
-                        index -= 2;
+                        NotFilledRaw -= 2;
                     }
                 }
                 for (int i = 0; i < GlassWidth; i++)
                 {
-                    if (index < 0)
+                    if (NotFilledRaw < 0)
                     {
-                        Glass[i, jndex] = Color.white;
+                        Glass[i, MovedRaw] = Color.white;
                     }
                     else
                     {
-                        Glass[i, jndex] = Glass[i, index];
+                        Glass[i, MovedRaw] = Glass[i, NotFilledRaw];
                     }
                 }
-                jndex--;
-                index--;
+                MovedRaw--;
+                NotFilledRaw--;
             }
         }
 
-        //
+        /// <summary>
+        /// this function will read user input
+        /// Down Left Right Arrows = Move
+        /// Up Arrow and l = Left rotate
+        /// r = Right rotate
+        /// </summary>
+        /// <returns>
+        /// string with recieved command
+        /// </returns>
         string CheckUserInput()
         {
             if (Input.GetKeyDown("up") || Input.GetKeyDown("l"))
@@ -310,7 +340,13 @@ namespace Tetris
             return "";
         }
 
-        //
+        /// <summary>
+        /// this function will transform CurrentFig
+        /// with the user input
+        /// </summary>
+        /// <param name="UserInput">
+        /// string with recieved command
+        /// </param>
         void TryMove(string UserInput)
         {
             switch (UserInput)
@@ -336,7 +372,13 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// this function will rollback transformation for CurrentFig
+        /// if it cannot be placed after transformation
+        /// </summary>
+        /// <param name="UserInput">
+        /// string with recieved command
+        /// </param>
         void Rollback(string UserInput)
         {
             switch (UserInput)
@@ -362,7 +404,14 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// if direction = -1 it's right rotation
+        /// overwise it's left rotation
+        /// </summary>
+        /// <param name="direction">
+        /// if it's = -1 it's right rotation
+        /// overwise it's left rotation
+        /// </param>
         void Rotate(int direction)
         {
             if (direction != -1)
@@ -401,13 +450,20 @@ namespace Tetris
             }
         }
 
-        //
+        /// <summary>
+        /// random selection from 0 to 100 percent
+        /// and check for
+        /// </summary>
+        /// <returns>
+        /// selected figure from Figures
+        /// </returns>
         Figure Select()
         {
             float rnd = Random.Range(0.0f, 100.0f);
             float LimitLeft = 0.0f;
             float LimitRight = 0.0f;
-            for (int i = 0; i < FigCount; i++)
+            int i = 0;
+            while (i < FigCount)
             {
                 LimitLeft = LimitRight;
                 LimitRight = LimitLeft + Figures[i].probability;
@@ -415,8 +471,9 @@ namespace Tetris
                 {
                     return Figures[i];
                 }
+                i++;
             }
-            return null;
+            return Figures[i - 1];
         }
     }
 }
