@@ -81,6 +81,8 @@ namespace Tetris
             NewFigure = true;
             DoUpdate = false;
             GameOver = false;
+            int mode = Mode.Select();
+            print(mode);
         }
 
         /// <summary>
@@ -141,6 +143,7 @@ namespace Tetris
             //rectTransform.offsetMin = Vector2.zero;
             //rectTransform.offsetMax = Vector2.zero;
             //button.onClick.AddListener(SpawnPlayer);
+            //
             GUILayout.BeginArea(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 70, 140, 140));
             GUILayout.Label("Select Game Mode");
             if (GUILayout.Button("Mode 1"))

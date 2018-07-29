@@ -235,7 +235,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Select.cs" />
+    <Compile Include="Assets\Mode.cs" />
+    <Compile Include="Assets\Random.cs" />
     <Compile Include="Assets\Tetris.cs" />
     <Compile Include="Assets\UserInput.cs" />
   </ItemGroup>
