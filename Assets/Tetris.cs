@@ -43,12 +43,10 @@ namespace Tetris
         private static int GameMode;
         private static int Scale;
         private static Figure CurrentFig;
-        private static Figure[] Figures;
-        private static int FigCount;
+        public static Figure[] Figures;
+        public static int FigCount;
         private static Rect rect;
         private static Texture2D texture;
-        private static float currenttime = 0;
-        private static float fallspeed = 1;
         private static bool[] FilledRaw;
         private static bool DoInit;
         private static bool GameOver;
@@ -79,6 +77,7 @@ namespace Tetris
             Figures[8] = new Figure(Color.blue, 5, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, 1 } }, 5, true);
             Figures[9] = new Figure(Color.cyan, 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 }, { -1, -1 } }, 5, true);
             DoInit = true;
+            //Init();
             NewFigure = true;
             DoUpdate = false;
             GameOver = false;
@@ -136,6 +135,12 @@ namespace Tetris
         void Init()
         {
             GameMode = 0;
+            //var button = Instantiate(Button, Vector3.zero, Quaternion.identity) as Button;
+            //var rectTransform = button.GetComponent<RectTransform>();
+            //rectTransform.SetParent(Canvas.transform);
+            //rectTransform.offsetMin = Vector2.zero;
+            //rectTransform.offsetMax = Vector2.zero;
+            //button.onClick.AddListener(SpawnPlayer);
             GUILayout.BeginArea(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 70, 140, 140));
             GUILayout.Label("Select Game Mode");
             if (GUILayout.Button("Mode 1"))
@@ -143,6 +148,7 @@ namespace Tetris
             if (GUILayout.Button("Mode 2"))
                 GameMode = 2;
             GUILayout.EndArea();
+
             if (GameMode == 1 || GameMode == 2)
             {
                 if (GameMode == 1)
@@ -242,7 +248,7 @@ namespace Tetris
         void NewFig()
         {
             RemoveRows();
-            CurrentFig = Select();
+            CurrentFig = Random.Select();
             CurrentFig.x = GlassWidth / 2;
             CurrentFig.y = 2;
             if (CheckOverlay())
@@ -288,8 +294,8 @@ namespace Tetris
         void Process()
         {
             PutFigure(Color.white);
-            string UserInput = CheckUserInput();
-            TryMove(UserInput);
+            string Input = UserInput.CheckUserInput();
+            TryMove(Input);
             bool checksides = false;
             bool checktop = false;
             bool checkbottom = false;
@@ -341,7 +347,7 @@ namespace Tetris
             }
             if ((GameMode == 1 && checksides) | checktop | checkbottom | checkoverlay)
             {
-                Rollback(UserInput);
+                Rollback(Input);
             }
             PutFigure(CurrentFig.color);
             if (checkfix)
@@ -400,35 +406,6 @@ namespace Tetris
                 MovedRaw--;
                 NotFilledRaw--;
             }
-        }
-
-        /// <summary>
-        /// this function will read user input
-        /// Down Left Right Arrows = Move
-        /// Up Arrow and l = Left rotate
-        /// r = Right rotate
-        /// </summary>
-        /// <returns>
-        /// string with recieved command
-        /// </returns>
-        string CheckUserInput()
-        {
-            if (Input.GetKeyDown("up") || Input.GetKeyDown("l"))
-                return "RotateLeft";
-            else if (Input.GetKeyDown("r"))
-                return "RotateRight";
-            else if (Input.GetKeyDown("down"))
-                return "MoveDown";
-            else if (Input.GetKeyDown("left"))
-                return "MoveLeft";
-            else if (Input.GetKeyDown("right"))
-                return "MoveRight";
-            else if (Time.time - currenttime >= fallspeed)
-            {
-                currenttime = Time.time;
-                return "FallDown";
-            }
-            return "";
         }
 
         /// <summary>
@@ -544,32 +521,6 @@ namespace Tetris
                 }
                 Glass[newx, newy] = color;
             }
-        }
-
-        /// <summary>
-        /// random selection from 0 to 100 percent
-        /// and check for
-        /// </summary>
-        /// <returns>
-        /// selected figure from Figures
-        /// </returns>
-        Figure Select()
-        {
-            float rnd = Random.Range(0.0f, 100.0f);
-            float LimitLeft = 0.0f;
-            float LimitRight = 0.0f;
-            int i = 0;
-            while (i < FigCount)
-            {
-                LimitLeft = LimitRight;
-                LimitRight = LimitLeft + Figures[i].probability;
-                if (rnd >= LimitLeft & rnd <= LimitRight)
-                {
-                    return Figures[i];
-                }
-                i++;
-            }
-            return Figures[i - 1];
         }
     }
 }
