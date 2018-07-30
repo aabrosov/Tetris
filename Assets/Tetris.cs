@@ -1,5 +1,6 @@
 ﻿//using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Tetris
 {
@@ -48,10 +49,14 @@ namespace Tetris
         private static Rect rect;
         private static Texture2D texture;
         private static bool[] FilledRaw;
-        private static bool DoInit;
+        public static bool DoInit;
         private static bool GameOver;
         private static bool NewFigure;
         private static bool DoUpdate;
+        private static bool DoRedraw;
+        GameObject myGO;
+        MainMenu mainmenu;
+        ExitMenu exitmenu;
 
         /// <summary>
         /// start application
@@ -61,8 +66,46 @@ namespace Tetris
         /// stop updates
         /// game is not over
         /// </summary>
-        void Start()
+        public void GameStart(int GM)
         {
+            print(GM);
+
+            myGO = GameObject.Find("GameMode");
+            var label1 = myGO.GetComponent<Text>();
+            label1.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("Mode1");
+            var button1 = myGO.GetComponent<Button>();
+            button1.enabled = false;
+            button1.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("Mode2");
+            var button2 = myGO.GetComponent<Button>();
+            button2.enabled = false;
+            button2.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("GameOver");
+            var label2 = myGO.GetComponent<Text>();
+            label2.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("Repeat");
+            var button3 = myGO.GetComponent<Button>();
+            button3.enabled = false;
+            button3.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("Exit");
+            var button4 = myGO.GetComponent<Button>();
+            button4.enabled = false;
+            button4.transform.localScale = new Vector3(0, 0, 0);
+
+            myGO = GameObject.Find("GameObject");
+            mainmenu = myGO.GetComponent<MainMenu>();
+            Destroy(mainmenu);
+            //mainmenu.Start();
+            //myGO = GameObject.Find("GameObject");
+            //exitmenu = myGO.GetComponent<ExitMenu>();
+            //exitmenu.Start();
+            GameMode = GM;
             CurrentFig = new Figure();
             texture = new Texture2D(1, 1);
             Figures = new Figure[10];
@@ -81,8 +124,13 @@ namespace Tetris
             NewFigure = true;
             DoUpdate = false;
             GameOver = false;
-            int mode = Mode.Select();
-            print(mode);
+        }
+
+        public void Start()
+        {
+            //DoInit = false;
+            //DoUpdate = false;
+            //GameOver = false;
         }
 
         /// <summary>
@@ -98,7 +146,7 @@ namespace Tetris
             {
                 End();
             }
-            else
+            else if (DoRedraw)
             {
                 Redraw();
             }
@@ -114,17 +162,19 @@ namespace Tetris
         {
             DoUpdate = false;
             Redraw();
-            GUILayout.BeginArea(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 100, 200, 200));
-            GUILayout.Label("Game Over");
-            if (GUILayout.Button("Repeat Game"))
-            {
-                Start();
-            }
-            if (GUILayout.Button("Exit"))
-            {
-                Application.Quit();
-            }
-            GUILayout.EndArea();
+            //GUILayout.BeginArea(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 100, 200, 200));
+            //GUILayout.Label("Game Over");
+            //if (GUILayout.Button("Repeat Game"))
+            //{
+            myGO = GameObject.Find("GameObject");
+            exitmenu = myGO.GetComponent<ExitMenu>();
+            exitmenu.Start();
+            //}
+            //if (GUILayout.Button("Exit"))
+            //{
+            //    Application.Quit();
+            //}
+            //GUILayout.EndArea();
         }
 
         /// <summary>
@@ -136,22 +186,20 @@ namespace Tetris
         /// </summary>
         void Init()
         {
-            GameMode = 0;
-            //var button = Instantiate(Button, Vector3.zero, Quaternion.identity) as Button;
-            //var rectTransform = button.GetComponent<RectTransform>();
-            //rectTransform.SetParent(Canvas.transform);
-            //rectTransform.offsetMin = Vector2.zero;
-            //rectTransform.offsetMax = Vector2.zero;
-            //button.onClick.AddListener(SpawnPlayer);
+            //GameMode = 0;
             //
-            GUILayout.BeginArea(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 70, 140, 140));
-            GUILayout.Label("Select Game Mode");
-            if (GUILayout.Button("Mode 1"))
-                GameMode = 1;
-            if (GUILayout.Button("Mode 2"))
-                GameMode = 2;
-            GUILayout.EndArea();
-
+            //GameObject myGO = GameObject.Find("MainMenu");
+            //MainMenu mainMenu = myGO.AddComponent<MainMenu>();
+            //mainMenu.Start();
+            //
+            //GUILayout.BeginArea(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 70, 140, 140));
+            //GUILayout.Label("Select Game Mode");
+            //if (GUILayout.Button("Mode 1"))
+            //    GameMode = 1;
+            //if (GUILayout.Button("Mode 2"))
+            //    GameMode = 2;
+            //GUILayout.EndArea();
+            //
             if (GameMode == 1 || GameMode == 2)
             {
                 if (GameMode == 1)
@@ -184,6 +232,7 @@ namespace Tetris
                 FilledRaw = new bool[GlassHeight];
                 DoInit = false;
                 DoUpdate = true;
+                DoRedraw = true;
             }
         }
 
