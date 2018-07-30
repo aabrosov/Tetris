@@ -15,17 +15,17 @@
             float LimitLeft = 0.0f;
             float LimitRight = 0.0f;
             int i = 0;
-            while (i < Tetris.FigCount)
+            while (i < Game.FigCount)
             {
                 LimitLeft = LimitRight;
-                LimitRight = LimitLeft + Tetris.Figures[i].probability;
+                LimitRight = LimitLeft + Game.Figures[i].probability;
                 if (rnd >= LimitLeft & rnd <= LimitRight)
                 {
-                    return Tetris.Figures[i];
+                    return Game.Figures[i];
                 }
                 i++;
             }
-            return Tetris.Figures[i - 1];
+            return Game.Figures[i - 1];
         }
     }
 }

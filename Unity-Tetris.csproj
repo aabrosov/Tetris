@@ -236,6 +236,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\ExitMenu.cs" />
+    <Compile Include="Assets\Game.cs" />
     <Compile Include="Assets\MainMenu.cs" />
     <Compile Include="Assets\Random.cs" />
     <Compile Include="Assets\Tetris.cs" />
