@@ -4,8 +4,8 @@ namespace Tetris
 {
     public class Tetris : MonoBehaviour
     {
-        public static int Mode;
-        public int MenuType;
+        static int Mode;
+        bool repeat;
         GameObject RootGameObject;
         MainMenu mainmenu;
         Game game;
@@ -15,46 +15,37 @@ namespace Tetris
         {
             RootGameObject = GameObject.Find("Root");
             mainmenu = RootGameObject.GetComponent<MainMenu>();
-            MenuType = 1;
+            game = RootGameObject.GetComponent<Game>();
+            Run(false);
         }
 
         //
-        public void ReStart()
+        public void Run(bool repetition)
         {
-            MenuType = 2;
+            repeat = repetition;
         }
 
         //
         void Update()
         {
-            if (MenuType == 1)
+            if (repeat == true)
             {
-                mainmenu.Show();
-            }
-            else if (MenuType == 2)
-            {
-                mainmenu.Show();
                 mainmenu.label1.text = "Game Over. Repeat?";
+                mainmenu.Show();
             }
             if (Mode == 1 || Mode == 2)
             {
                 mainmenu.Hide();
-                Game.GameStart(Mode);
+                game.Run(Mode);
                 Mode = 0;
-                MenuType = 0;
+                repeat = false;
             }
         }
         
         //
-        public static void SetMode1()
+        public static void SetMode(int mod)
         {
-            Mode = 1;
-        }
-        
-        //
-        public static void SetMode2()
-        {
-            Mode = 2;
+            Mode = mod;
         }
     }
 }

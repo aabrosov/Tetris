@@ -238,6 +238,17 @@
     <Compile Include="Assets\Game.cs" />
     <Compile Include="Assets\MainMenu.cs" />
     <Compile Include="Assets\Random.cs" />
+    <Compile Include="Assets\Tetramino.cs" />
+    <Compile Include="Assets\TetraminoI.cs" />
+    <Compile Include="Assets\TetraminoJ.cs" />
+    <Compile Include="Assets\TetraminoL.cs" />
+    <Compile Include="Assets\TetraminoO.cs" />
+    <Compile Include="Assets\TetraminoS.cs" />
+    <Compile Include="Assets\TetraminoT.cs" />
+    <Compile Include="Assets\TetraminoU.cs" />
+    <Compile Include="Assets\TetraminoW.cs" />
+    <Compile Include="Assets\TetraminoX.cs" />
+    <Compile Include="Assets\TetraminoZ.cs" />
     <Compile Include="Assets\Tetris.cs" />
     <Compile Include="Assets\UserInput.cs" />
   </ItemGroup>

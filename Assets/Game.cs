@@ -24,13 +24,11 @@ namespace Tetris
     public class Game : MonoBehaviour
     {
         public static int GameMode;
-        GameObject RootGameObject;
         private static int GlassWidth;
         private static int GlassHeight;
         private static int ShiftX;
         private static int ShiftY;
         private static Color[,] Glass;
-        //private static int GameMode;
         private static int Scale;
         private static Figure CurrentFig;
         public static Figure[] Figures;
@@ -44,9 +42,18 @@ namespace Tetris
         private static bool DoUpdate;
         private static bool DoRedraw;
 
-        public static void GameStart(int GM)
+        GameObject RootGameObject;
+        Tetris tetris;
+
+        public void Start()
         {
-            GameMode = GM;
+            RootGameObject = GameObject.Find("Root");
+            tetris = RootGameObject.GetComponent<Tetris>();
+        }
+
+        public void Run(int gamemode)
+        {
+            GameMode = gamemode;
             CurrentFig = new Figure();
             texture = new Texture2D(1, 1);
             Figures = new Figure[10];
@@ -85,9 +92,7 @@ namespace Tetris
         {
             DoUpdate = false;
             Redraw();
-            RootGameObject = GameObject.Find("Root");
-            var tetris = RootGameObject.GetComponent<Tetris>();
-            tetris.ReStart();
+            tetris.Run(true);
         }
         void Init()
         {

@@ -9,7 +9,6 @@ namespace Tetris
         public Button m_Button1, m_Button2, m_Button3;
         public Text label1;
         Button button1, button2, button3;
-        Vector3 zeros, ones;
 
         //
         public void Start()
@@ -17,13 +16,11 @@ namespace Tetris
             m_Label1 = GameObject.Find("Label");
             label1 = m_Label1.GetComponent<Text>();
             button1 = m_Button1.GetComponent<Button>();
-            button1.onClick.AddListener(Tetris.SetMode1);
+            button1.onClick.AddListener(delegate { Tetris.SetMode(1); });
             button2 = m_Button2.GetComponent<Button>();
-            button2.onClick.AddListener(Tetris.SetMode2);
+            button2.onClick.AddListener(delegate { Tetris.SetMode(2); });
             button3 = m_Button3.GetComponent<Button>();
             button3.onClick.AddListener(Exit);
-            zeros = new Vector3(0, 0, 0);
-            ones = new Vector3(1, 1, 1);
         }
 
         //
@@ -35,25 +32,25 @@ namespace Tetris
         //
         public void Hide()
         {
-            label1.transform.localScale = zeros;
+            label1.transform.localScale = Vector3.zero;
             button1.enabled = false;
-            button1.transform.localScale = zeros;
+            button1.transform.localScale = Vector3.zero;
             button2.enabled = false;
-            button2.transform.localScale = zeros;
+            button2.transform.localScale = Vector3.zero;
             button3.enabled = false;
-            button3.transform.localScale = zeros;
+            button3.transform.localScale = Vector3.zero;
         }
 
         //
         public void Show()
         {
-            label1.transform.localScale = ones;
+            label1.transform.localScale = Vector3.one;
             button1.enabled = true;
-            button1.transform.localScale = ones;
+            button1.transform.localScale = Vector3.one;
             button2.enabled = true;
-            button2.transform.localScale = ones;
+            button2.transform.localScale = Vector3.one;
             button3.enabled = true;
-            button3.transform.localScale = ones;
+            button3.transform.localScale = Vector3.one;
         }
     }
 }
