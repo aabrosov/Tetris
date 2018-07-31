@@ -24,7 +24,7 @@ namespace Tetris
     public class Game : MonoBehaviour
     {
         public static int GameMode;
-        public GameObject myGO;
+        GameObject RootGameObject;
         private static int GlassWidth;
         private static int GlassHeight;
         private static int ShiftX;
@@ -44,8 +44,9 @@ namespace Tetris
         private static bool DoUpdate;
         private static bool DoRedraw;
 
-        public void Start()
+        public static void GameStart(int GM)
         {
+            GameMode = GM;
             CurrentFig = new Figure();
             texture = new Texture2D(1, 1);
             Figures = new Figure[10];
@@ -84,12 +85,9 @@ namespace Tetris
         {
             DoUpdate = false;
             Redraw();
-            //print("WTF");
-            myGO = GameObject.Find("GameObject");
-            var tetris = myGO.GetComponent<Tetris>();
+            RootGameObject = GameObject.Find("Root");
+            var tetris = RootGameObject.GetComponent<Tetris>();
             tetris.ReStart();
-
-            //Destroy(this);
         }
         void Init()
         {
@@ -389,18 +387,6 @@ namespace Tetris
                 }
                 Glass[newx, newy] = color;
             }
-        }
-
-        public static void SetMode1()
-        {
-            print("mode1");
-            GameMode = 1;
-        }
-
-        public static void SetMode2()
-        {
-            print("mode2");
-            GameMode = 2;
         }
     }
 }

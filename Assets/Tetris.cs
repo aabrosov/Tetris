@@ -4,52 +4,57 @@ namespace Tetris
 {
     public class Tetris : MonoBehaviour
     {
-        public static int GameMode;
-        public GameObject myGO;
-        public enum MenuType { Main, Exit }
-        private MenuType menuType;
+        public static int Mode;
+        public int MenuType;
+        GameObject RootGameObject;
+        MainMenu mainmenu;
         Game game;
-        void Start()
+
+        //
+        public void Start()
         {
-            myGO = GameObject.Find("GameObject");
-            var mainmenu = myGO.GetComponent<MainMenu>();
-            mainmenu.Show();
-            menuType = MenuType.Main;
+            RootGameObject = GameObject.Find("Root");
+            mainmenu = RootGameObject.GetComponent<MainMenu>();
+            MenuType = 1;
         }
+
+        //
         public void ReStart()
         {
-            myGO = GameObject.Find("GameObject");
-            var exitmenu = myGO.GetComponent<ExitMenu>();
-            exitmenu.Show();
-            menuType = MenuType.Exit;
+            MenuType = 2;
         }
+
+        //
         void Update()
         {
-            if (GameMode == 1 || GameMode == 2)
+            if (MenuType == 1)
             {
-                if (menuType == MenuType.Main)
-                {
-                    var mainmenu = myGO.GetComponent<MainMenu>();
-                    mainmenu.Hide();
-                }
-                else if (menuType == MenuType.Exit)
-                {
-                    var exitmenu = myGO.GetComponent<ExitMenu>();
-                    exitmenu.Hide();
-                }
-                //Destroy(mainmenu);
-                var game = myGO.GetComponent<Game>();
-                game.Start();
-                GameMode = 0;
+                mainmenu.Show();
+            }
+            else if (MenuType == 2)
+            {
+                mainmenu.Show();
+                mainmenu.label1.text = "Game Over. Repeat?";
+            }
+            if (Mode == 1 || Mode == 2)
+            {
+                mainmenu.Hide();
+                Game.GameStart(Mode);
+                Mode = 0;
+                MenuType = 0;
             }
         }
+        
+        //
         public static void SetMode1()
         {
-            GameMode = 1;
+            Mode = 1;
         }
+        
+        //
         public static void SetMode2()
         {
-            GameMode = 2;
+            Mode = 2;
         }
     }
 }
