@@ -913,10 +913,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da0f9d2304608534b9b1149bf0db910c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  label1: {fileID: 1070771050}
   m_Button1: {fileID: 2030147762}
   m_Button2: {fileID: 458922146}
   m_Button3: {fileID: 774984434}
+  label1: {fileID: 1070771050}
 --- !u!114 &1879227310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -928,7 +928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86b12072d58c10f4c83facf670c8f231, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MenuType: 0
 --- !u!114 &1879227311
 MonoBehaviour:
   m_ObjectHideFlags: 0

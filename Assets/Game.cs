@@ -1,15 +1,12 @@
 ﻿using UnityEngine;
-//using UnityEngine.UI;
+
 namespace Tetris
 {
     public class Game : MonoBehaviour
     {
         public static int GameMode;
-        private static int GlassWidth;
-        private static int GlassHeight;
         private static int ShiftX;
         private static int ShiftY;
-        private static Color[,] Glass;
         private static int Scale;
         private static Tetramino CurrentFig;
         public static Tetramino[] Figures;
@@ -25,13 +22,12 @@ namespace Tetris
 
         GameObject RootGameObject;
         Tetris tetris;
+        Glass glass;
 
-        public void Run(int gamemode)
+        public void Start()
         {
             RootGameObject = GameObject.Find("Root");
             tetris = RootGameObject.GetComponent<Tetris>();
-            GameMode = gamemode;
-            //CurrentFig = new Tetramino();
             texture = new Texture2D(1, 1);
             Figures = new Tetramino[10];
             Figures[0] = new TetraminoO();
@@ -48,6 +44,12 @@ namespace Tetris
             NewFigure = true;
             DoUpdate = false;
             GameOver = false;
+        }
+
+        public void Run(int gamemode)
+        {
+            GameMode = gamemode;
+            Start();
         }
 
         void OnGUI()
@@ -74,32 +76,29 @@ namespace Tetris
             {
                 if (GameMode == 1)
                 {
-                    GlassHeight = 20;
-                    GlassWidth = 10;
+                    glass = new Glass(10, 20);
                     FigCount = 7;
                 }
                 else if (GameMode == 2)
                 {
-                    GlassHeight = 12;
-                    GlassWidth = 20;
+                    glass = new Glass(20, 12);
                     FigCount = 10;
                     Figures[6].probability = 5;
                 }
-                int ScaleX = (Screen.width - 160) / (GlassWidth + 3);
-                int ScaleY = Screen.height / (GlassHeight + 1);
+                int ScaleX = (Screen.width - 160) / (glass.Width + 3);
+                int ScaleY = Screen.height / (glass.Height + 1);
                 Scale = Mathf.Min(ScaleX, ScaleY);
-                Glass = new Color[GlassWidth, GlassHeight];
-                ShiftX = Screen.width / Scale - GlassWidth - 2;
-                ShiftY = (Screen.height / Scale - GlassHeight - 1) / 2;
-                for (int i = 0; i < GlassWidth; i++)
+                ShiftX = Screen.width / Scale - glass.Width - 2;
+                ShiftY = (Screen.height / Scale - glass.Height - 1) / 2;
+                for (int i = 0; i < glass.Width; i++)
                 {
-                    for (int j = 0; j < GlassHeight; j++)
+                    for (int j = 0; j < glass.Height; j++)
                     {
-                        Glass[i, j] = Color.white;
+                        glass.Board[i, j] = Color.white;
                     }
                 }
                 rect = new Rect();
-                FilledRaw = new bool[GlassHeight];
+                FilledRaw = new bool[glass.Height];
                 DoInit = false;
                 DoUpdate = true;
                 DoRedraw = true;
@@ -108,17 +107,17 @@ namespace Tetris
         void Redraw()
         {
             Color currentcolor;
-            for (int i = -1; i < GlassWidth + 1; i++)
+            for (int i = -1; i < glass.Width + 1; i++)
             {
-                for (int j = 0; j < GlassHeight + 1; j++)
+                for (int j = 0; j < glass.Height + 1; j++)
                 {
-                    if (i == -1 | i == GlassWidth | j == GlassHeight)
+                    if (i == -1 | i == glass.Width | j == glass.Height)
                     {
                         currentcolor = Color.black;
                     }
                     else
                     {
-                        currentcolor = Glass[i, j];
+                        currentcolor = glass.Board[i, j];
                     }
                     if (currentcolor != Color.white)
                     {
@@ -152,7 +151,7 @@ namespace Tetris
         {
             RemoveRows();
             CurrentFig = Random.Select();
-            CurrentFig.x = GlassWidth / 2;
+            CurrentFig.x = glass.Width / 2;
             CurrentFig.y = 2;
             if (CheckOverlay())
             {
@@ -168,7 +167,7 @@ namespace Tetris
             {
                 newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
                 newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
-                if (Glass[newx, newy] != Color.white)
+                if (glass.Board[newx, newy] != Color.white)
                 {
                     checkoverlay = true;
                     break;
@@ -191,40 +190,40 @@ namespace Tetris
             {
                 newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
                 newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
-                if (GameMode == 1 && (newx < 0 || newx >= GlassWidth))
+                if (GameMode == 1 && (newx < 0 || newx >= glass.Width))
                 {
                     checksides = true;
                     break;
                 }
                 while (newx < 0)
                 {
-                    newx += GlassWidth;
+                    newx += glass.Width;
                 }
-                if (newx >= GlassWidth)
+                if (newx >= glass.Width)
                 {
-                    newx %= GlassWidth;
+                    newx %= glass.Width;
                 }
                 if (newy < 0)
                 {
                     checktop = true;
                     break;
                 }
-                if (newy >= GlassHeight)
+                if (newy >= glass.Height)
                 {
                     checkbottom = true;
                     break;
                 }
-                if (Glass[newx, newy] != Color.white)
+                if (glass.Board[newx, newy] != Color.white)
                 {
                     checkoverlay = true;
                     break;
                 }
-                if (newy == GlassHeight - 1)
+                if (newy == glass.Height - 1)
                 {
                     checkfix = true;
                     break;
                 }
-                if (newy < GlassHeight - 1 & Glass[newx, newy + 1] != Color.white)
+                if (newy < glass.Height - 1 & glass.Board[newx, newy + 1] != Color.white)
                 {
                     checkfix = true;
                     break;
@@ -237,22 +236,21 @@ namespace Tetris
             PutFigure(CurrentFig.color);
             if (checkfix)
             {
-                //PutFigure(CurrentFig.color);
                 checkfix = false;
                 NewFigure = true;
             }
         }
         void RemoveRows()
         {
-            for (int j = 0; j < GlassHeight; j++)
+            for (int j = 0; j < glass.Height; j++)
             {
                 FilledRaw[j] = true;
-                for (int i = 0; i < GlassWidth; i++)
-                    if (Glass[i, j] == Color.white)
+                for (int i = 0; i < glass.Width; i++)
+                    if (glass.Board[i, j] == Color.white)
                         FilledRaw[j] = false;
             }
-            int MovedRaw = GlassHeight - 1;
-            int NotFilledRaw = GlassHeight - 1;
+            int MovedRaw = glass.Height - 1;
+            int NotFilledRaw = glass.Height - 1;
             while (MovedRaw >= 0)
             {
                 if (GameMode == 1 && NotFilledRaw >= 0)
@@ -269,15 +267,15 @@ namespace Tetris
                         NotFilledRaw -= 2;
                     }
                 }
-                for (int i = 0; i < GlassWidth; i++)
+                for (int i = 0; i < glass.Width; i++)
                 {
                     if (NotFilledRaw < 0)
                     {
-                        Glass[i, MovedRaw] = Color.white;
+                        glass.Board[i, MovedRaw] = Color.white;
                     }
                     else
                     {
-                        Glass[i, MovedRaw] = Glass[i, NotFilledRaw];
+                        glass.Board[i, MovedRaw] = glass.Board[i, NotFilledRaw];
                     }
                 }
                 MovedRaw--;
@@ -358,13 +356,13 @@ namespace Tetris
                 newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
                 while (newx < 0)
                 {
-                    newx += GlassWidth;
+                    newx += glass.Width;
                 }
-                if (newx >= GlassWidth)
+                if (newx >= glass.Width)
                 {
-                    newx %= GlassWidth;
+                    newx %= glass.Width;
                 }
-                Glass[newx, newy] = color;
+                glass.Board[newx, newy] = color;
             }
         }
     }
