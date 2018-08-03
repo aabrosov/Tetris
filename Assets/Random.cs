@@ -9,7 +9,7 @@
         /// <returns>
         /// selected figure from Figures
         /// </returns>
-        public static Figure Select()
+        public static Tetramino Select()
         {
             float rnd = UnityEngine.Random.Range(0.0f, 100.0f);
             float LimitLeft = 0.0f;

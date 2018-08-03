@@ -2,25 +2,6 @@
 //using UnityEngine.UI;
 namespace Tetris
 {
-    public class Figure
-    {
-        public Color color;
-        public int count;
-        public int[,] tiles;
-        public int probability;
-        public bool allowrotate;
-        public int x;
-        public int y;
-        public Figure() {}
-        public Figure(Color color, int count, int[,] tiles, int probability, bool allowrotate)
-        {
-            this.color = color;
-            this.count = count;
-            this.tiles = tiles;
-            this.probability = probability;
-            this.allowrotate = allowrotate;
-        }
-    }
     public class Game : MonoBehaviour
     {
         public static int GameMode;
@@ -30,8 +11,8 @@ namespace Tetris
         private static int ShiftY;
         private static Color[,] Glass;
         private static int Scale;
-        private static Figure CurrentFig;
-        public static Figure[] Figures;
+        private static Tetramino CurrentFig;
+        public static Tetramino[] Figures;
         public static int FigCount;
         private static Rect rect;
         private static Texture2D texture;
@@ -45,28 +26,24 @@ namespace Tetris
         GameObject RootGameObject;
         Tetris tetris;
 
-        public void Start()
+        public void Run(int gamemode)
         {
             RootGameObject = GameObject.Find("Root");
             tetris = RootGameObject.GetComponent<Tetris>();
-        }
-
-        public void Run(int gamemode)
-        {
             GameMode = gamemode;
-            CurrentFig = new Figure();
+            //CurrentFig = new Tetramino();
             texture = new Texture2D(1, 1);
-            Figures = new Figure[10];
-            Figures[0] = new Figure(Color.red, 4, new int[,] { { 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 } }, 10, false);
-            Figures[1] = new Figure(Color.green, 4, new int[,] { { 0, 0 }, { 0, -1 }, { 1, 0 }, { -1, -1 } }, 15, true);
-            Figures[2] = new Figure(Color.blue, 4, new int[,] { { 0, 0 }, { 0, -1 }, { 1, -1 }, { -1, 0 } }, 15, true);
-            Figures[3] = new Figure(Color.cyan, 4, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, -1 } }, 15, true);
-            Figures[4] = new Figure(Color.magenta, 4, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { -1, -1 } }, 15, true);
-            Figures[5] = new Figure(Color.yellow, 4, new int[,] { { 1, 0 }, { 0, 0 }, { -1, 0 }, { -2, 0 } }, 10, true);
-            Figures[6] = new Figure(Color.red, 4, new int[,] { { 0, 0 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }, 20, true);
-            Figures[7] = new Figure(Color.green, 5, new int[,] { { 0, 0 }, { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }, 5, false);
-            Figures[8] = new Figure(Color.blue, 5, new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, 1 } }, 5, true);
-            Figures[9] = new Figure(Color.cyan, 5, new int[,] { { 0, 0 }, { 1, 1 }, { 0, 1 }, { -1, 0 }, { -1, -1 } }, 5, true);
+            Figures = new Tetramino[10];
+            Figures[0] = new TetraminoO();
+            Figures[1] = new TetraminoL();
+            Figures[2] = new TetraminoJ();
+            Figures[3] = new TetraminoS();
+            Figures[4] = new TetraminoZ();
+            Figures[5] = new TetraminoI();
+            Figures[6] = new TetraminoT();
+            Figures[7] = new TetraminoX();
+            Figures[8] = new TetraminoU();
+            Figures[9] = new TetraminoW();
             DoInit = true;
             NewFigure = true;
             DoUpdate = false;
@@ -78,21 +55,18 @@ namespace Tetris
             if (DoInit)
             {
                 Init();
+                
             }
             else if (GameOver)
             {
-                End();
+                DoUpdate = false;
+                Redraw();
+                tetris.Run(true);
             }
             else if (DoRedraw)
             {
                 Redraw();
             }
-        }
-        void End()
-        {
-            DoUpdate = false;
-            Redraw();
-            tetris.Run(true);
         }
         void Init()
         {
