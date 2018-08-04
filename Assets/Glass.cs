@@ -23,14 +23,11 @@ namespace Tetris
             {
                 this.Width = 10;
                 this.Height = 20;
-                Game.FigCount = 7;
             }
             else if (Mode == 2)
             {
                 this.Width = 20;
                 this.Height = 12;
-                Game.FigCount = 10;
-                Game.Figures[6].probability = 5;
             }
             FilledRaw = new bool[Height];
 

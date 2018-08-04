@@ -6,9 +6,6 @@ namespace Tetris
     {
         public static int Mode;
         private static Tetramino CurrentFig;
-        public static Tetramino[] Figures;
-        public static int FigCount;
-        //private static bool[] FilledRaw;
         public static bool DoInit;
         private static bool GameOver;
         private static bool NewFigure;
@@ -18,22 +15,12 @@ namespace Tetris
         GameObject RootGameObject;
         Tetris tetris;
         Glass glass;
+        Figures figures;
 
         public void Start()
         {
             RootGameObject = GameObject.Find("Root");
             tetris = RootGameObject.GetComponent<Tetris>();
-            Figures = new Tetramino[10];
-            Figures[0] = new TetraminoO();
-            Figures[1] = new TetraminoL();
-            Figures[2] = new TetraminoJ();
-            Figures[3] = new TetraminoS();
-            Figures[4] = new TetraminoZ();
-            Figures[5] = new TetraminoI();
-            Figures[6] = new TetraminoT();
-            Figures[7] = new TetraminoX();
-            Figures[8] = new TetraminoU();
-            Figures[9] = new TetraminoW();
             DoInit = true;
             NewFigure = true;
             DoUpdate = false;
@@ -77,7 +64,8 @@ namespace Tetris
                 if (NewFigure)
                 {
                     glass.RemoveRows();
-                    CurrentFig = Random.Select();
+                    figures = new Figures(Mode);
+                    CurrentFig = figures.Select();
                     CurrentFig.x = glass.Width / 2;
                     CurrentFig.y = 2;
                     if (CheckOverlay())
@@ -178,22 +166,19 @@ namespace Tetris
             switch (UserInput)
             {
                 case "RotateLeft":
-                    Rotate(1);
+                    CurrentFig.RotateLeft();
                     break;
                 case "RotateRight":
-                    Rotate(-1);
+                    CurrentFig.RotateRight();
                     break;
                 case "MoveDown":
-                    CurrentFig.y += 1;
-                    break;
-                case "FallDown":
-                    CurrentFig.y += 1;
+                    CurrentFig.MoveDown();
                     break;
                 case "MoveLeft":
-                    CurrentFig.x -= 1;
+                    CurrentFig.MoveLeft();
                     break;
                 case "MoveRight":
-                    CurrentFig.x += 1;
+                    CurrentFig.MoveRight();
                     break;
             }
         }
@@ -202,40 +187,20 @@ namespace Tetris
             switch (UserInput)
             {
                 case "RotateLeft":
-                    Rotate(-1);
+                    CurrentFig.RotateRight();
                     break;
                 case "RotateRight":
-                    Rotate(1);
+                    CurrentFig.RotateLeft();
                     break;
                 case "MoveDown":
-                    CurrentFig.y -= 1;
-                    break;
-                case "FallDown":
-                    CurrentFig.y -= 1;
+                    CurrentFig.MoveUp();
                     break;
                 case "MoveLeft":
-                    CurrentFig.x += 1;
+                    CurrentFig.MoveRight();
                     break;
                 case "MoveRight":
-                    CurrentFig.x -= 1;
+                    CurrentFig.MoveLeft();
                     break;
-            }
-        }
-        void Rotate(int direction)
-        {
-            if (direction != -1)
-            {
-                direction = 1;
-            }
-            if (CurrentFig.allowrotate)
-            {
-                int temp;
-                for (int i = 0; i < CurrentFig.count; i++)
-                {
-                    temp = -CurrentFig.tiles[i, 0];
-                    CurrentFig.tiles[i, 0] = direction * CurrentFig.tiles[i, 1];
-                    CurrentFig.tiles[i, 1] = direction * temp;
-                }
             }
         }
         void PutFigure(Color color)

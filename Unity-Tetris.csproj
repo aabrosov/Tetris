@@ -235,10 +235,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Figures.cs" />
     <Compile Include="Assets\Game.cs" />
     <Compile Include="Assets\Glass.cs" />
     <Compile Include="Assets\MainMenu.cs" />
-    <Compile Include="Assets\Random.cs" />
     <Compile Include="Assets\Tetramino.cs" />
     <Compile Include="Assets\TetraminoI.cs" />
     <Compile Include="Assets\TetraminoJ.cs" />

@@ -7,6 +7,9 @@ namespace Tetris
         private static float CurrentTime = 0;
         private static float FallSpeed = 1;
 
+        public delegate void MyDelegate();
+        MyDelegate myDelegate;
+
         /// <summary>
         /// this function will read user input
         /// Down Left Right Arrows = Move
@@ -41,7 +44,7 @@ namespace Tetris
             else if (Time.time - CurrentTime >= FallSpeed)
             {
                 CurrentTime = Time.time;
-                return "FallDown";
+                return "MoveDown";
             }
             return "";
         }
