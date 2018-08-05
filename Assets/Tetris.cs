@@ -59,10 +59,10 @@ namespace Tetris
         /// <summary>
         /// set gamemode from mainmenu buttons
         /// </summary>
-        /// <param name="mod"></param>
-        public static void SetMode(int mod)
+        /// <param name="mode"></param>
+        public static void SetMode(int mode)
         {
-            Mode = mod;
+            Mode = mode;
         }
     }
 }

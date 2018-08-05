@@ -7,13 +7,13 @@ namespace Tetris
     /// </summary>
     public class Game : MonoBehaviour
     {
-        public static int Mode;
-        public Tetramino CurrentFig;
-        public static bool DoInit;
-        private static bool GameOver;
-        private static bool NewFigure;
-        private static bool DoUpdate;
-        private static bool DoRedraw;
+        private int Mode;
+        private Tetramino CurrentFig;
+        private bool DoInit;
+        private bool GameOver;
+        private bool NewFigure;
+        private bool DoUpdate;
+        private bool DoRedraw;
 
         GameObject RootGameObject;
         Tetris tetris;
@@ -21,6 +21,7 @@ namespace Tetris
         Checker checker;
         Figures figures;
         UserInput userInput;
+        string Input;
 
         /// <summary>
         /// init all objects
@@ -37,6 +38,7 @@ namespace Tetris
             figures = new Figures(Mode);
             NewFigure = true;
 
+            userInput = new UserInput();
             DoUpdate = false;
             GameOver = false;
         }
@@ -103,8 +105,7 @@ namespace Tetris
                 else
                 {
                     glass.PutFigure(CurrentFig, Color.white);
-                    userInput = new UserInput();
-                    string Input = userInput.CheckUserInput();
+                    Input = userInput.CheckUserInput();
                     CurrentFig.TryMove(Input);
                     if (checker.Sides(CurrentFig, Mode) || checker.SidesY(CurrentFig) || checker.Overlay(CurrentFig))
                     {

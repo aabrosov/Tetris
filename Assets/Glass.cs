@@ -11,15 +11,13 @@ namespace Tetris
         public int Width { set; get; }
         public int Height { set; get; }
         public Color[,] Board;
-        private static Texture2D texture;
-        private static int ShiftX;
-        private static int ShiftY;
-        private static int Scale;
-        private static Rect rect;
-        private static bool[] FilledRaw;
+        private Texture2D texture;
+        private int ShiftX;
+        private int ShiftY;
+        private int Scale;
+        private Rect rect;
+        private bool[] FilledRaw;
         private int Mode;
-
-        protected Glass(){}
 
         /// <summary>
         /// construct a glass with selected mode
