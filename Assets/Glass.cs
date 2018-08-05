@@ -120,5 +120,23 @@ namespace Tetris
                 NotFilledRaw--;
             }
         }
+        public void PutFigure(Tetramino tmino, Color color)
+        {
+            int newx, newy;
+            foreach (Tile tile in tmino.tiles)
+            {
+                newx = tile.x + tmino.x;
+                newy = tile.y + tmino.y;
+                while (newx < 0)
+                {
+                    newx += Width;
+                }
+                if (newx >= Width)
+                {
+                    newx %= Width;
+                }
+                Board[newx, newy] = color;
+            }
+        }
     }
 }

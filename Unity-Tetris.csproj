@@ -251,6 +251,7 @@
     <Compile Include="Assets\TetraminoX.cs" />
     <Compile Include="Assets\TetraminoZ.cs" />
     <Compile Include="Assets\Tetris.cs" />
+    <Compile Include="Assets\Tile.cs" />
     <Compile Include="Assets\UserInput.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

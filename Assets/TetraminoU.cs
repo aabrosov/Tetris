@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace Tetris
 {
@@ -7,8 +8,12 @@ namespace Tetris
         public TetraminoU()
         {
             color = Color.blue;
-            count = 5;
-            tiles = new int[,] { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, 1 } };
+            tiles = new List<Tile>();
+            tiles.Add(new Tile(0, 0));
+            tiles.Add(new Tile(1, 0));
+            tiles.Add(new Tile(-1, 0));
+            tiles.Add(new Tile(1, 1));
+            tiles.Add(new Tile(-1, 1));
             probability = 5;
             allowrotate = true;
         }

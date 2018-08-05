@@ -2,24 +2,12 @@
 
 namespace Tetris
 {
-    public class UserInput
+    public class UserInput : Tetramino
     {
         private static float CurrentTime = 0;
         private static float FallSpeed = 1;
 
-        public delegate void MyDelegate();
-        MyDelegate myDelegate;
-
-        /// <summary>
-        /// this function will read user input
-        /// Down Left Right Arrows = Move
-        /// Up Arrow and l = Left rotate
-        /// r = Right rotate
-        /// </summary>
-        /// <returns>
-        /// string with recieved command
-        /// </returns>
-        public static string CheckUserInput()
+        public string CheckUserInput()
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.L))
             {
@@ -29,10 +17,6 @@ namespace Tetris
             {
                 return "RotateRight";
             }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                return "MoveDown";
-            }
             else if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 return "MoveLeft";
@@ -41,12 +25,12 @@ namespace Tetris
             {
                 return "MoveRight";
             }
-            else if (Time.time - CurrentTime >= FallSpeed)
+            else if (Input.GetKeyDown(KeyCode.DownArrow) || Time.time - CurrentTime >= FallSpeed)
             {
                 CurrentTime = Time.time;
                 return "MoveDown";
             }
-            return "";
+            return "DoNothing";
         }
     }
 }

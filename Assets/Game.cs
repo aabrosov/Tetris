@@ -5,7 +5,7 @@ namespace Tetris
     public class Game : MonoBehaviour
     {
         public static int Mode;
-        private static Tetramino CurrentFig;
+        public Tetramino CurrentFig;
         public static bool DoInit;
         private static bool GameOver;
         private static bool NewFigure;
@@ -16,6 +16,7 @@ namespace Tetris
         Tetris tetris;
         Glass glass;
         Figures figures;
+        UserInput userInput;
 
         public void Start()
         {
@@ -84,10 +85,10 @@ namespace Tetris
         {
             int newx, newy;
             bool checkoverlay = false;
-            for (int i = 0; i < CurrentFig.count; i++)
+            foreach (Tile tile in CurrentFig.tiles)
             {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
+                newx = tile.x + CurrentFig.x;
+                newy = tile.y + CurrentFig.y;
                 if (glass.Board[newx, newy] != Color.white)
                 {
                     checkoverlay = true;
@@ -98,19 +99,20 @@ namespace Tetris
         }
         void Process()
         {
-            PutFigure(Color.white);
-            string Input = UserInput.CheckUserInput();
-            TryMove(Input);
+            glass.PutFigure(CurrentFig, Color.white);
+            userInput = new UserInput();
+            string Input = userInput.CheckUserInput();
+            CurrentFig.TryMove(Input);
             bool checksides = false;
             bool checktop = false;
             bool checkbottom = false;
             bool checkoverlay = false;
             bool checkfix = false;
             int newx, newy;
-            for (int i = 0; i < CurrentFig.count; i++)
+            foreach (Tile tile in CurrentFig.tiles)
             {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
+                newx = tile.x + CurrentFig.x;
+                newy = tile.y + CurrentFig.y;
                 if (Mode == 1 && (newx < 0 || newx >= glass.Width))
                 {
                     checksides = true;
@@ -152,73 +154,13 @@ namespace Tetris
             }
             if ((Mode == 1 && checksides) | checktop | checkbottom | checkoverlay)
             {
-                Rollback(Input);
+                CurrentFig.Rollback(Input);
             }
-            PutFigure(CurrentFig.color);
+            glass.PutFigure(CurrentFig, CurrentFig.color);
             if (checkfix)
             {
                 checkfix = false;
                 NewFigure = true;
-            }
-        }
-        void TryMove(string UserInput)
-        {
-            switch (UserInput)
-            {
-                case "RotateLeft":
-                    CurrentFig.RotateLeft();
-                    break;
-                case "RotateRight":
-                    CurrentFig.RotateRight();
-                    break;
-                case "MoveDown":
-                    CurrentFig.MoveDown();
-                    break;
-                case "MoveLeft":
-                    CurrentFig.MoveLeft();
-                    break;
-                case "MoveRight":
-                    CurrentFig.MoveRight();
-                    break;
-            }
-        }
-        void Rollback(string UserInput)
-        {
-            switch (UserInput)
-            {
-                case "RotateLeft":
-                    CurrentFig.RotateRight();
-                    break;
-                case "RotateRight":
-                    CurrentFig.RotateLeft();
-                    break;
-                case "MoveDown":
-                    CurrentFig.MoveUp();
-                    break;
-                case "MoveLeft":
-                    CurrentFig.MoveRight();
-                    break;
-                case "MoveRight":
-                    CurrentFig.MoveLeft();
-                    break;
-            }
-        }
-        void PutFigure(Color color)
-        {
-            int newx, newy;
-            for (int i = 0; i < CurrentFig.count; i++)
-            {
-                newx = CurrentFig.tiles[i, 0] + CurrentFig.x;
-                newy = CurrentFig.tiles[i, 1] + CurrentFig.y;
-                while (newx < 0)
-                {
-                    newx += glass.Width;
-                }
-                if (newx >= glass.Width)
-                {
-                    newx %= glass.Width;
-                }
-                glass.Board[newx, newy] = color;
             }
         }
     }
