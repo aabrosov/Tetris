@@ -3,10 +3,18 @@ using System.Collections.Generic;
 
 namespace Tetris
 {
+    /// <summary>
+    /// class for create all figures
+    /// and select one with provided possibility
+    /// </summary>
     public class Figures
     {
         List<Tetramino> AllFigs;
 
+        /// <summary>
+        /// constructor for all tetraminos
+        /// </summary>
+        /// <param name="Mode">if mode=2 it's extended mode with more figures</param>
         public Figures(int Mode)
         {
             AllFigs = new List<Tetramino>();
@@ -26,6 +34,11 @@ namespace Tetris
                 AllFigs.Add(new TetraminoW());
             }
         }
+
+        /// <summary>
+        /// select tetramino with provided possibility
+        /// </summary>
+        /// <returns>selected figure</returns>
         public Tetramino Select()
         {
             float rnd = Random.Range(0.0f, 100.0f);
@@ -42,6 +55,5 @@ namespace Tetris
             }
             return AllFigs[0];
         }
-
     }
 }

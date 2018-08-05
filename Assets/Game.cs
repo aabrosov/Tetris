@@ -2,6 +2,9 @@
 
 namespace Tetris
 {
+    /// <summary>
+    /// main game logic
+    /// </summary>
     public class Game : MonoBehaviour
     {
         public static int Mode;
@@ -15,32 +18,50 @@ namespace Tetris
         GameObject RootGameObject;
         Tetris tetris;
         Glass glass;
+        Checker checker;
         Figures figures;
         UserInput userInput;
 
+        /// <summary>
+        /// init all objects
+        /// </summary>
         public void Start()
         {
             RootGameObject = GameObject.Find("Root");
             tetris = RootGameObject.GetComponent<Tetris>();
+
+            glass = new Glass(Mode);
+            checker = new Checker(glass);
             DoInit = true;
+
+            figures = new Figures(Mode);
             NewFigure = true;
+
             DoUpdate = false;
             GameOver = false;
         }
 
+        /// <summary>
+        /// run game with selected mode
+        /// </summary>
+        /// <param name="gamemode"></param>
         public void Run(int gamemode)
         {
             Mode = gamemode;
             Start();
         }
 
+        /// <summary>
+        /// while not gameover,
+        /// if game mode = 1 or 2
+        /// redraw glass
+        /// </summary>
         void OnGUI()
         {
             if (DoInit)
             {
                 if (Mode == 1 || Mode == 2)
                 {
-                    glass = new Glass(Mode);
                     DoInit = false;
                     DoUpdate = true;
                     DoRedraw = true;
@@ -58,6 +79,11 @@ namespace Tetris
             }
         }
 
+        /// <summary>
+        /// create new figure,
+        /// and move it down with reading user input
+        /// and trying to do what user wants
+        /// </summary>
         void Update()
         {
             if (DoUpdate)
@@ -65,11 +91,10 @@ namespace Tetris
                 if (NewFigure)
                 {
                     glass.RemoveRows();
-                    figures = new Figures(Mode);
                     CurrentFig = figures.Select();
                     CurrentFig.x = glass.Width / 2;
                     CurrentFig.y = 2;
-                    if (CheckOverlay())
+                    if (checker.Overlay(CurrentFig))
                     {
                         GameOver = true;
                     }
@@ -77,90 +102,20 @@ namespace Tetris
                 }
                 else
                 {
-                    Process();
+                    glass.PutFigure(CurrentFig, Color.white);
+                    userInput = new UserInput();
+                    string Input = userInput.CheckUserInput();
+                    CurrentFig.TryMove(Input);
+                    if (checker.Sides(CurrentFig, Mode) || checker.SidesY(CurrentFig) || checker.Overlay(CurrentFig))
+                    {
+                        CurrentFig.Rollback(Input);
+                    }
+                    if (checker.Fix(CurrentFig))
+                    {
+                        NewFigure = true;
+                    }
+                    glass.PutFigure(CurrentFig, CurrentFig.color);
                 }
-            }
-        }
-        bool CheckOverlay()
-        {
-            int newx, newy;
-            bool checkoverlay = false;
-            foreach (Tile tile in CurrentFig.tiles)
-            {
-                newx = tile.x + CurrentFig.x;
-                newy = tile.y + CurrentFig.y;
-                if (glass.Board[newx, newy] != Color.white)
-                {
-                    checkoverlay = true;
-                    break;
-                }
-            }
-            return checkoverlay;
-        }
-        void Process()
-        {
-            glass.PutFigure(CurrentFig, Color.white);
-            userInput = new UserInput();
-            string Input = userInput.CheckUserInput();
-            CurrentFig.TryMove(Input);
-            bool checksides = false;
-            bool checktop = false;
-            bool checkbottom = false;
-            bool checkoverlay = false;
-            bool checkfix = false;
-            int newx, newy;
-            foreach (Tile tile in CurrentFig.tiles)
-            {
-                newx = tile.x + CurrentFig.x;
-                newy = tile.y + CurrentFig.y;
-                if (Mode == 1 && (newx < 0 || newx >= glass.Width))
-                {
-                    checksides = true;
-                    break;
-                }
-                while (newx < 0)
-                {
-                    newx += glass.Width;
-                }
-                if (newx >= glass.Width)
-                {
-                    newx %= glass.Width;
-                }
-                if (newy < 0)
-                {
-                    checktop = true;
-                    break;
-                }
-                if (newy >= glass.Height)
-                {
-                    checkbottom = true;
-                    break;
-                }
-                if (glass.Board[newx, newy] != Color.white)
-                {
-                    checkoverlay = true;
-                    break;
-                }
-                if (newy == glass.Height - 1)
-                {
-                    checkfix = true;
-                    break;
-                }
-                if (newy < glass.Height - 1 & glass.Board[newx, newy + 1] != Color.white)
-                {
-                    checkfix = true;
-                    break;
-                }
-            }
-            if ((Mode == 1 && checksides) | checktop | checkbottom | checkoverlay)
-            {
-                CurrentFig.Rollback(Input);
-            }
-            glass.PutFigure(CurrentFig, CurrentFig.color);
-            if (checkfix)
-            {
-                checkfix = false;
-                NewFigure = true;
             }
         }
     }

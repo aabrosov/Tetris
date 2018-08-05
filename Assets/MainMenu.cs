@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace Tetris
 {
+    /// <summary>
+    /// class to draw message and three buttons
+    /// </summary>
     public class MainMenu : MonoBehaviour
     {
         GameObject m_Label1;
@@ -10,7 +13,9 @@ namespace Tetris
         public Text label1;
         Button button1, button2, button3;
 
-        //
+        /// <summary>
+        /// getting components and adding listeners
+        /// </summary>
         public void Start()
         {
             m_Label1 = GameObject.Find("Label");
@@ -23,13 +28,17 @@ namespace Tetris
             button3.onClick.AddListener(Exit);
         }
 
-        //
+        /// <summary>
+        /// quit game
+        /// </summary>
         public static void Exit()
         {
             Application.Quit();
         }
 
-        //
+        /// <summary>
+        /// hide all ui elements
+        /// </summary>
         public void Hide()
         {
             label1.transform.localScale = Vector3.zero;
@@ -41,7 +50,9 @@ namespace Tetris
             button3.transform.localScale = Vector3.zero;
         }
 
-        //
+        /// <summary>
+        /// show all ui elements
+        /// </summary>
         public void Show()
         {
             label1.transform.localScale = Vector3.one;

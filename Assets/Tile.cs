@@ -2,6 +2,10 @@
 
 namespace Tetris
 {
+    /// <summary>
+    /// one tile of tetramino
+    /// x and y are relative coordinates from the center of rotation
+    /// </summary>
     public class Tile
     {
         public int x { set; get; }

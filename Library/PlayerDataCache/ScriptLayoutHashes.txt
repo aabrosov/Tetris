@@ -1,6 +1,6 @@
 WindowsStandalone
 PlayerPath?
-C:/Users/aabrosov/Documents/Unity-Tetris/tetris.exe
+C:/Users/abros/Downloads/Unity-Tetris/tetris.exe
 SceneListBegin?
 Assets/Scene1.unity
 SceneListEnd?
@@ -80,7 +80,7 @@ c63db43c730fa2cbb8ca07de15898cb6 UnityEngine.UI.dll:UnityEngine.UI.Toggle
 f61c0793411f10cf5fbfa1473fef5ef2 UnityEngine.UI.dll:UnityEngine.UI.ToggleGroup
 86d36c43c53541d667100dc90b89cfba UnityEngine.UI.dll:UnityEngine.EventSystems.TouchInputModule
 1b8c02d0aa82fbf036a2b9b2d713eec3 UnityEngine.UI.dll:UnityEngine.UI.VerticalLayoutGroup
-d76538fd3704d4d1993a4a6c430f5ebf Assembly-CSharp.dll:Tetris.Tetris
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:Tetris.Tetris
 0038986c206da92c2eae7910d45eab90 Assembly-CSharp.dll:Tetris.MainMenu
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
 dbc29a6f2739d277c10da432d73adb6d UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationTrack

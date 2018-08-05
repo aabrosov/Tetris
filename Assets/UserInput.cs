@@ -2,11 +2,15 @@
 
 namespace Tetris
 {
-    public class UserInput : Tetramino
+    public class UserInput
     {
         private static float CurrentTime = 0;
         private static float FallSpeed = 1;
 
+        /// <summary>
+        /// check user input
+        /// </summary>
+        /// <returns>string with user command</returns>
         public string CheckUserInput()
         {
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.L))
@@ -30,7 +34,7 @@ namespace Tetris
                 CurrentTime = Time.time;
                 return "MoveDown";
             }
-            return "DoNothing";
+            return "";
         }
     }
 }

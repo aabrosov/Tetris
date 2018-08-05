@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Tetris
 {
+    /// <summary>
+    /// abstract class for creating tetraminos
+    /// </summary>
     public abstract class Tetramino
     {
         public Color color;
@@ -13,6 +16,9 @@ namespace Tetris
 
         public List<Tile> tiles;
 
+        /// <summary>
+        /// rotate tetramino ccw
+        /// </summary>
         public void RotateLeft()
         {
             if (allowrotate)
@@ -27,6 +33,9 @@ namespace Tetris
             }
         }
 
+        /// <summary>
+        /// rotate tetramino cw
+        /// </summary>
         public void RotateRight()
         {
             if (allowrotate)
@@ -41,30 +50,42 @@ namespace Tetris
             }
         }
 
+        /// <summary>
+        /// move tetramino left
+        /// </summary>
         public void MoveLeft()
         {
             x--;
         }
 
+        /// <summary>
+        /// move tetramino right
+        /// </summary>
         public void MoveRight()
         {
             x++;
         }
 
+        /// <summary>
+        /// move tetramino up
+        /// </summary>
         public void MoveUp()
         {
             y--;
         }
 
+        /// <summary>
+        /// move tetramino down
+        /// </summary>
         public void MoveDown()
         {
             y++;
         }
 
-        public void DoNothing()
-        {
-        }
-
+        /// <summary>
+        /// execute command from user
+        /// </summary>
+        /// <param name="UserInput"></param>
         public void TryMove(string UserInput)
         {
             if (UserInput == "RotateLeft")
@@ -77,10 +98,12 @@ namespace Tetris
                 MoveRight();
             else if (UserInput == "MoveLeft")
                 MoveLeft();
-            else
-                DoNothing();
         }
 
+        /// <summary>
+        /// rollback if after trymove we have collision
+        /// </summary>
+        /// <param name="UserInput"></param>
         public void Rollback(string UserInput)
         {
             if (UserInput == "RotateLeft")
@@ -93,8 +116,6 @@ namespace Tetris
                 MoveLeft();
             else if (UserInput == "MoveLeft")
                 MoveRight();
-            else
-                DoNothing();
         }
     }
 }

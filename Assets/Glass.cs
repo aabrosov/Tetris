@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace Tetris
 {
+    /// <summary>
+    /// this glass is a gameboard
+    /// </summary>
     public class Glass
     {
         public int Width { set; get; }
@@ -16,6 +19,12 @@ namespace Tetris
         private static bool[] FilledRaw;
         private int Mode;
 
+        protected Glass(){}
+
+        /// <summary>
+        /// construct a glass with selected mode
+        /// </summary>
+        /// <param name="Mode"></param>
         public Glass(int Mode)
         {
             this.Mode = Mode;
@@ -49,6 +58,9 @@ namespace Tetris
             texture = new Texture2D(1, 1);
         }
 
+        /// <summary>
+        /// redraw glass content
+        /// </summary>
         public void Redraw()
         {
             Color currentcolor;
@@ -78,6 +90,11 @@ namespace Tetris
                 }
             }
         }
+
+        /// <summary>
+        /// remove all filled raws in mode 1
+        /// remove pairs of filled raws in mode 2
+        /// </summary>
         public void RemoveRows()
         {
             for (int j = 0; j < Height; j++)
@@ -120,6 +137,12 @@ namespace Tetris
                 NotFilledRaw--;
             }
         }
+
+        /// <summary>
+        /// put provided tetramino to glass with specified color
+        /// </summary>
+        /// <param name="tmino"></param>
+        /// <param name="color"></param>
         public void PutFigure(Tetramino tmino, Color color)
         {
             int newx, newy;

@@ -3,6 +3,11 @@ using UnityEngine.UI;
 
 namespace Tetris
 {
+    /// <summary>
+    /// class to show main menu
+    /// wait for user mode selection
+    /// and run game with defined mode
+    /// </summary>
     public class Tetris : MonoBehaviour
     {
         static int Mode;
@@ -11,7 +16,9 @@ namespace Tetris
         MainMenu mainmenu;
         Game game;
 
-        //
+        /// <summary>
+        /// init objects and starting game in the first time
+        /// </summary>
         public void Start()
         {
             RootGameObject = GameObject.Find("Root");
@@ -20,13 +27,19 @@ namespace Tetris
             Run(false);
         }
 
-        //
+        /// <summary>
+        /// if user selects run another game
+        /// it will be run with repetition=true
+        /// </summary>
+        /// <param name="repetition"></param>
         public void Run(bool repetition)
         {
             repeat = repetition;
         }
 
-        //
+        /// <summary>
+        /// hide/show main menu, run game, change message for user
+        /// </summary>
         void Update()
         {
             if (repeat == true)
@@ -43,7 +56,10 @@ namespace Tetris
             }
         }
         
-        //
+        /// <summary>
+        /// set gamemode from mainmenu buttons
+        /// </summary>
+        /// <param name="mod"></param>
         public static void SetMode(int mod)
         {
             Mode = mod;

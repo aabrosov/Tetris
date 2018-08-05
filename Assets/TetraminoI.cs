@@ -7,7 +7,7 @@ namespace Tetris
     {
         public TetraminoI()
         {
-            color = Color.yellow;
+            color = Color.red;
             tiles = new List<Tile>();
             tiles.Add(new Tile(1, 0));
             tiles.Add(new Tile(0, 0));
